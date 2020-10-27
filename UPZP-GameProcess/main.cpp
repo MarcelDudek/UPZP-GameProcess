@@ -22,5 +22,25 @@ int main() {
               << err.message() << std::endl;
   }
 
+  if (socket.is_open()) {
+    std::string request =
+        "GET /index.html HTTP/1.1\r\n"
+        "Host: example.com\r\n"
+        "Connection: close\r\n\r\n";
+
+    socket.write_some(asio::buffer(request.data(), request.size()), err);
+
+    using namespace std::chrono_literals;
+    std::this_thread::sleep_for(200ms);
+
+    size_t bytes = socket.available();
+    if (bytes > 0) {
+      std::vector<char> buffer(bytes);
+      socket.read_some(asio::buffer(buffer.data(), buffer.size()), err);
+
+      for (auto c : buffer) std::cout << c;
+    }
+  }
+
   return 0; 
 }
