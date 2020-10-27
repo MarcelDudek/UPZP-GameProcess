@@ -7,6 +7,7 @@
 #include <asio.hpp>
 #include <asio/ts/buffer.hpp>
 #include <asio/ts/internet.hpp>
+#include "test_data_generated.h"
 
 int main() { 
   asio::error_code err;
@@ -21,10 +22,19 @@ int main() {
     std::cout << "Failed to connect to address:\n"
               << err.message() << std::endl;
   }
+  flatbuffers::FlatBufferBuilder builder(1024);
+  auto flat_string = builder.CreateString("Testowy String!");
+  TestData::Vec3 vec3{1.1, 2.2, 3.3};
+
+  auto tester = TestData::CreateTester(builder, &vec3, 123, flat_string);
+  builder.Finish(tester);
 
   if (socket.is_open()) {
-    std::string request = "Testowe wyslanie danych\n";
+    std::string request = "Koniec\n";
 
+    std::cout << "SIZE: " << builder.GetSize() << std::endl;
+
+    socket.write_some(asio::buffer(builder.GetBufferPointer(), builder.GetSize()), err);
     socket.write_some(asio::buffer(request.data(), request.size()), err);
   }
 
