@@ -12,7 +12,7 @@ int main() {
   asio::error_code err;
   asio::io_context context;
 
-  asio::ip::tcp::endpoint endpoint(asio::ip::make_address("93.184.216.34", err), 80);
+  asio::ip::tcp::endpoint endpoint(asio::ip::make_address("127.0.0.1", err), 2137);
   asio::ip::tcp::socket socket(context);
   socket.connect(endpoint, err);
   if (!err) {
@@ -23,23 +23,9 @@ int main() {
   }
 
   if (socket.is_open()) {
-    std::string request =
-        "GET /index.html HTTP/1.1\r\n"
-        "Host: example.com\r\n"
-        "Connection: close\r\n\r\n";
+    std::string request = "Testowe wyslanie danych\n";
 
     socket.write_some(asio::buffer(request.data(), request.size()), err);
-
-    using namespace std::chrono_literals;
-    std::this_thread::sleep_for(200ms);
-
-    size_t bytes = socket.available();
-    if (bytes > 0) {
-      std::vector<char> buffer(bytes);
-      socket.read_some(asio::buffer(buffer.data(), buffer.size()), err);
-
-      for (auto c : buffer) std::cout << c;
-    }
   }
 
   return 0; 
