@@ -35,7 +35,7 @@ int main() {
     std::cout << "SIZE: " << builder.GetSize() << std::endl;
 
     socket.write_some(asio::buffer(builder.GetBufferPointer(), builder.GetSize()), err);
-    socket.write_some(asio::buffer(request.data(), request.size()), err);
+    //socket.write_some(asio::buffer(request.data(), request.size()), err);
   }
 
   return 0; 
