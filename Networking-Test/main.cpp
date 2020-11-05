@@ -14,12 +14,19 @@ int main() {
   asio::io_service service;
   asio::io_context context;
 
-  asio::ip::tcp::acceptor acceptor(service, asio::ip::tcp::endpoint(asio::ip::tcp::v4(), 2137));
+  int port;
+  int buffer_size;
+  std::cout << "Podaj port: ";
+  std::cin >> port;
+  std::cout << "Podaj rozmiar buforu w bajtach: ";
+  std::cin >> buffer_size;
+
+  asio::ip::tcp::acceptor acceptor(service, asio::ip::tcp::endpoint(asio::ip::tcp::v4(), port));
   asio::ip::tcp::socket socket(service);
 
   acceptor.accept(socket);
 
-  std::vector<char> buf(56);
+  std::vector<char> buf(buffer_size);
   // asio::read_until(socket, buf, "\n", err);
   asio::read(socket, asio::buffer(buf.data(), buf.size()));
   if (err) {

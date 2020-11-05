@@ -13,7 +13,14 @@ int main() {
   asio::error_code err;
   asio::io_context context;
 
-  asio::ip::tcp::endpoint endpoint(asio::ip::make_address("127.0.0.1", err), 2137);
+  std::string ip_address;
+  int port;
+  std::cout << "Podaj adres IP: ";  // "127.0.0.1"
+  std::cin >> ip_address;
+  std::cout << "Podaj port: ";
+  std::cin >> port;
+
+  asio::ip::tcp::endpoint endpoint(asio::ip::make_address(ip_address, err), port);
   asio::ip::tcp::socket socket(context);
   socket.connect(endpoint, err);
   if (!err) {
