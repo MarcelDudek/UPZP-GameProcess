@@ -27,4 +27,9 @@
       <Filter>Flatbuffers</Filter>
     </None>
   </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="game_status_generated.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
 </Project>

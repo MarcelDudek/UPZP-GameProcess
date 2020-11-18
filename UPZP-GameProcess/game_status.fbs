@@ -21,7 +21,7 @@ table Player {
   id:uint32;
   points:int;
   position:Position (required);
-  vehicle:Vehicle (required);
+  vehicle:Vehicle;
 }
 
 
