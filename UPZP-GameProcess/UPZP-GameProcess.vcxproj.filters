@@ -16,10 +16,22 @@
     <Filter Include="Flatbuffers">
       <UniqueIdentifier>{e05a452f-3545-457f-ba60-abd4e9292936}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Client Communication">
+      <UniqueIdentifier>{9be71314-d292-4f68-96ba-eb1cdadc90b1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Client Communication\Src">
+      <UniqueIdentifier>{8cb0e2cd-e021-497e-a972-9fce60c5d1f3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Client Communication\Inc">
+      <UniqueIdentifier>{cc9d3026-4c16-4264-9f7f-adabd72d0949}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="client_communication.cpp">
+      <Filter>Client Communication\Src</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -29,6 +41,15 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="game_status_generated.h">
+      <Filter>Client Communication\Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="client_communication.h">
+      <Filter>Client Communication\Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="client.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="vehicle_types.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
