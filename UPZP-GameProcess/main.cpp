@@ -3,9 +3,19 @@
 #endif
 #define ASIO_STANDALONE
 
+#include "client_communication.h"
+#include <asio.hpp>
 #include <iostream>
 
 int main() {
-  std::cout << "Hello world!";
-  return 0;
+  try {
+    asio::io_context context;
+    upzp::client_com::ClientCommunication client_comm(context, 2137);
+    client_comm.Start();
+    context.run();  
+  } catch (std::exception& ex) {
+    std::cout << ex.what() << std::endl;
+  }
+
+  while (true);
 }

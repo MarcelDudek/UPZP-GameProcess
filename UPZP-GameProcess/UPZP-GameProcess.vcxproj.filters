@@ -52,5 +52,8 @@
     <ClInclude Include="vehicle_types.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="client_udp.h">
+      <Filter>Client Communication\Inc</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

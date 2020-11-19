@@ -1,6 +1,7 @@
 #pragma once
 
-#include "client.h"
+#include "client_udp.h"
+#include <asio.hpp>
 #include <vector>
 
 namespace upzp::client_com {
@@ -10,11 +11,14 @@ namespace upzp::client_com {
 */
 class ClientCommunication {
  private:
-  std::vector<Client> clients_;
-  const unsigned int port_;
+  asio::ip::udp::socket socket_;
+  asio::ip::udp::endpoint remote_endpoint_;
+  std::vector<ClientUdp> clients_;
+  std::vector<char> buffer_;
 
  public:
-  explicit ClientCommunication(const unsigned int port);
+  explicit ClientCommunication(asio::io_context& context, const unsigned int port);
+  void Start();
 };
 
 }  // namespace upzp::client_com
