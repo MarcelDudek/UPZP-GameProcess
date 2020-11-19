@@ -33,6 +33,12 @@
     <ClCompile Include="client_communication.cpp">
       <Filter>Client Communication\Src</Filter>
     </ClCompile>
+    <ClCompile Include="Client.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="client_udp.cpp">
+      <Filter>Client Communication\Src</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="game_status.fbs">

@@ -8,11 +8,17 @@ namespace upzp {
 /**
  * @brief Basic client representation.
 */
-struct Client {
-  std::string ip_adress;
-  std::string name;
-  uint32_t id;
-  VehicleType vehicle;
+class Client {
+ protected:
+  const std::string name_;
+  const uint32_t id_;
+  const VehicleType vehicle_;
+
+ public:
+  Client(const std::string name, const uint32_t id, const VehicleType vehicle);
+  std::string Name() const;
+  uint32_t Id() const;
+  VehicleType Vehicle() const;
 };
 
 }  // namespace upzp
