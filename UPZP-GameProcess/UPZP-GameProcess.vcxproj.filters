@@ -39,6 +39,9 @@
     <ClCompile Include="client_udp.cpp">
       <Filter>Client Communication\Src</Filter>
     </ClCompile>
+    <ClCompile Include="datagram.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="game_status.fbs">
@@ -60,6 +63,9 @@
     </ClInclude>
     <ClInclude Include="client_udp.h">
       <Filter>Client Communication\Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="datagram.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
