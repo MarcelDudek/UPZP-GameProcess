@@ -1,4 +1,5 @@
 #include "datagram.h"
+#include "CRC.h"
 #include <stdexcept>
 #include <string>
 
@@ -50,6 +51,13 @@ void Datagram::Load(const void* buffor, const size_t length) {
     header_checksum = *(static_cast<const int16_t*>(buffor) + 10);
     payload_start = static_cast<const char*>(buffor) + 12;
     header_lenght = 12;
+  }
+
+  // check if header checksum is correct
+  int16_t header_crc = CRC::Calculate(buffor, header_lenght, CRC::CRC_16_ARC());
+  if (header_checksum != header_crc) {
+    throw std::runtime_error(
+        "Header checksum is not equal to calculated CRC checksum.");
   }
 
   // load payload
