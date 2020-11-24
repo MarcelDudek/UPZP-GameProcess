@@ -1,22 +1,24 @@
 #include "datagram.h"
-#include "CRC.h"
+
 #include <stdexcept>
 #include <string>
+
+#include "CRC.h"
 
 namespace upzp {
 
 /**
  * @brief Load the datagram from buffor.
- * @param buffor 
+ * @param buffor
  * @param lenght Length of the buffor.
-*/
+ */
 void Datagram::Load(const void* buffor, const size_t length) {
   constexpr size_t MINIMAL_LENGTH = 12;
 
   if (length < MINIMAL_LENGTH) {
     throw std::runtime_error("Datagram length " + std::to_string(length) +
                              " is shorter than minimal length of " +
-        std::to_string(MINIMAL_LENGTH) + ".");
+                             std::to_string(MINIMAL_LENGTH) + ".");
   }
 
   // load begin sequence
@@ -38,9 +40,10 @@ void Datagram::Load(const void* buffor, const size_t length) {
   // load checksums and payload length
   if (payload_checksum_included_) {  // if payload checksum is inluded
     if (length < MINIMAL_LENGTH + 4) {
-      throw std::runtime_error("Datagram length " + std::to_string(length) +
-                               " is shorter than length of header with payload checksum included" +
-                               std::to_string(MINIMAL_LENGTH + 4) + ".");
+      throw std::runtime_error(
+          "Datagram length " + std::to_string(length) +
+          " is shorter than length of header with payload checksum included" +
+          std::to_string(MINIMAL_LENGTH + 4) + ".");
     }
 
     payload_checksum_ = *(static_cast<const uint32_t*>(buffor) + 8);
@@ -54,7 +57,8 @@ void Datagram::Load(const void* buffor, const size_t length) {
   }
 
   // check if header checksum is correct
-  int16_t header_crc = CRC::Calculate(buffor, header_lenght, CRC::CRC_16_ARC());
+  int16_t header_crc =
+      CRC::Calculate(buffor, header_lenght - 2, CRC::CRC_16_ARC());
   if (header_checksum != header_crc) {
     throw std::runtime_error(
         "Header checksum is not equal to calculated CRC checksum.");
@@ -67,5 +71,30 @@ void Datagram::Load(const void* buffor, const size_t length) {
   payload_ =
       std::vector<const char>(payload_start, payload_start + payload_lenght_);
 }
+
+/**
+ * Check payload correctness by checking if the checksum
+ * and length are correct.
+ *
+ * @brief Check if payload is correct.
+ * @return True for correct payload.
+ */
+bool Datagram::PayloadCorrectness() const {
+  if (payload_lenght_ != payload_.size()) return false;
+
+  if (payload_checksum_included_) {
+    int32_t crc =
+        CRC::Calculate(payload_.data(), payload_.size(), CRC::CRC_32());
+    if (crc != payload_checksum_) return false;
+  }
+
+  return true;
+}
+
+/**
+ * @brief Get payload data.
+ * @return Payload data.
+ */
+std::vector<const char> Datagram::Payload() const { return payload_; }
 
 }  // namespace upzp

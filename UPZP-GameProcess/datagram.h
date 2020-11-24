@@ -17,6 +17,8 @@ class Datagram {
 
  public:
   void Load(const void* buffor, const size_t length);
+  bool PayloadCorrectness() const;
+  std::vector<const char> Payload() const;
 };
 
 }  // namespace upzp
