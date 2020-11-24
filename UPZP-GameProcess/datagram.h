@@ -13,12 +13,12 @@ class Datagram {
   int32_t payload_checksum_;
   bool payload_checksum_included_;
 
-  std::vector<const char> payload_;
+  std::vector<char> payload_;
 
  public:
   void Load(const void* buffor, const size_t length);
   bool PayloadCorrectness() const;
-  std::vector<const char> Payload() const;
+  std::vector<char> Payload() const;
 };
 
 }  // namespace upzp

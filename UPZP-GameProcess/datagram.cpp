@@ -28,10 +28,10 @@ void Datagram::Load(const void* buffor, const size_t length) {
   }
 
   // load version and check if payload checksum is included
-  version_ = *(static_cast<const int16_t*>(buffor) + 2) & 0x00FF;
+  version_ = *(static_cast<const int16_t*>(buffor) + 1) & 0x00FF;
   payload_checksum_included_ =
       *(static_cast<const uint8_t*>(buffor) + 3) & 0b10000000;
-  payload_lenght_ = *(static_cast<const uint32_t*>(buffor) + 4);
+  payload_lenght_ = *(static_cast<const uint32_t*>(buffor) + 1);
 
   unsigned short header_lenght;
   int16_t header_checksum;
@@ -46,12 +46,12 @@ void Datagram::Load(const void* buffor, const size_t length) {
           std::to_string(MINIMAL_LENGTH + 4) + ".");
     }
 
-    payload_checksum_ = *(static_cast<const uint32_t*>(buffor) + 8);
-    header_checksum = *(static_cast<const int16_t*>(buffor) + 14);
+    payload_checksum_ = *(static_cast<const uint32_t*>(buffor) + 2);
+    header_checksum = *(static_cast<const int16_t*>(buffor) + 7);
     payload_start = static_cast<const char*>(buffor) + 16;
     header_lenght = 16;
   } else {  // if payload checksum isn't included
-    header_checksum = *(static_cast<const int16_t*>(buffor) + 10);
+    header_checksum = *(static_cast<const int16_t*>(buffor) + 5);
     payload_start = static_cast<const char*>(buffor) + 12;
     header_lenght = 12;
   }
@@ -69,7 +69,7 @@ void Datagram::Load(const void* buffor, const size_t length) {
     throw std::runtime_error("Payload length overflows the datagram.");
   }
   payload_ =
-      std::vector<const char>(payload_start, payload_start + payload_lenght_);
+      std::vector<char>(payload_start, payload_start + payload_lenght_);
 }
 
 /**
@@ -95,6 +95,6 @@ bool Datagram::PayloadCorrectness() const {
  * @brief Get payload data.
  * @return Payload data.
  */
-std::vector<const char> Datagram::Payload() const { return payload_; }
+std::vector<char> Datagram::Payload() const { return payload_; }
 
 }  // namespace upzp
