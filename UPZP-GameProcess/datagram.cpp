@@ -98,6 +98,12 @@ bool Datagram::PayloadCorrectness() const {
 std::vector<char> Datagram::Payload() const { return payload_; }
 
 /**
+ * @brief Get version.
+ * @return Version number.
+*/
+int Datagram::Version() const { return version_; }
+
+/**
  * @brief Set the version of the datagram.
  * @param version New version.
  */

@@ -47,6 +47,9 @@
     <None Include="game_status.fbs">
       <Filter>Flatbuffers</Filter>
     </None>
+    <None Include="player_input.fbs">
+      <Filter>Flatbuffers</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="game_status_generated.h">
@@ -68,6 +71,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="CRC.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="player_input_generated.h">
+      <Filter>Client Communication\Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="player_input.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

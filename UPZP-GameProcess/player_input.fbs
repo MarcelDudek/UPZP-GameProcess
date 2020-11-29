@@ -1,0 +1,13 @@
+// UPZP's player input schema
+
+namespace Upzp.PlayerInput;
+
+/// Player's input.
+table Input {
+  sequence:ulong;           // sequence number, should be incremented every tick
+  disconnect:bool = false;  // disconnect flag
+  direction:float;          // direction of player input (angle in radians, where 0 is north)
+  move:bool;                // should the vehicle move
+}
+
+root_type Input;

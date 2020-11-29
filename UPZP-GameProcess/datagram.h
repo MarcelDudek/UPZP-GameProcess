@@ -22,6 +22,7 @@ class Datagram {
   void Load(const void* buffer, const size_t length);
   bool PayloadCorrectness() const;
   std::vector<char> Payload() const;
+  int Version() const;
 
   void SetVersion(int16_t version);
   void SetPayloadChecksum(bool include_payload_checksum);
