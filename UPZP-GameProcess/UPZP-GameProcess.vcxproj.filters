@@ -33,13 +33,16 @@
     <ClCompile Include="client_communication.cpp">
       <Filter>Client Communication\Src</Filter>
     </ClCompile>
-    <ClCompile Include="Client.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="client_udp.cpp">
       <Filter>Client Communication\Src</Filter>
     </ClCompile>
     <ClCompile Include="datagram.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="client.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="udp_communication_mocker.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -78,6 +81,9 @@
     </ClInclude>
     <ClInclude Include="player_input.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="udp_communication_mocker.h">
+      <Filter>Source Files</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

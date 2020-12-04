@@ -10,15 +10,16 @@ namespace upzp::client_com {
 /**
  * @brief Client in UDP communication.
 */
-class ClientUdp : Client {
+class ClientUdp : public Client {
  private:
   static constexpr int DATAGRAM_PLAYER_INPUT_VER = 1;
 
-  const Upzp::PlayerInput::Input* player_input_;
+  PlayerInput input_;
+  uint64_t last_sequence_;
 
  public:
-  ClientUdp(const std::string name, const uint32_t id, const VehicleType vehicle);
-  ~ClientUdp();
+  ClientUdp(const std::string name, const uint32_t id, const VehicleType vehicle, const std::string ip);
+  ClientUdp(Client& client);
 
   asio::ip::udp::endpoint remote_endpoint_;  /**< Client remote endpoint for communication. */
   bool DecodeDatagram(const char* buffer, const size_t size);

@@ -151,11 +151,12 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="Client.cpp" />
+    <ClCompile Include="client.cpp" />
     <ClCompile Include="client_communication.cpp" />
     <ClCompile Include="client_udp.cpp" />
     <ClCompile Include="datagram.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="udp_communication_mocker.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="game_status.fbs" />
@@ -170,6 +171,7 @@
     <ClInclude Include="game_status_generated.h" />
     <ClInclude Include="player_input.h" />
     <ClInclude Include="player_input_generated.h" />
+    <ClInclude Include="udp_communication_mocker.h" />
     <ClInclude Include="vehicle_types.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
