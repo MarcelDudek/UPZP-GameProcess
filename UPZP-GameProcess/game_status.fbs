@@ -41,6 +41,7 @@ table PointBox {
 
 /// Game includes all information about current game status.
 table Game {
+  sequence:ulong;             // sequence number, should be incremented every tick
   teams:[Team] (required);
   boxes:[PointBox];
   finished:bool = false;

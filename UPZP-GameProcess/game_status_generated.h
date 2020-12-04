@@ -307,10 +307,14 @@ inline flatbuffers::Offset<PointBox> CreatePointBox(
 struct Game FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   typedef GameBuilder Builder;
   enum FlatBuffersVTableOffset FLATBUFFERS_VTABLE_UNDERLYING_TYPE {
-    VT_TEAMS = 4,
-    VT_BOXES = 6,
-    VT_FINISHED = 8
+    VT_SEQUENCE = 4,
+    VT_TEAMS = 6,
+    VT_BOXES = 8,
+    VT_FINISHED = 10
   };
+  uint64_t sequence() const {
+    return GetField<uint64_t>(VT_SEQUENCE, 0);
+  }
   const flatbuffers::Vector<flatbuffers::Offset<Upzp::GameStatus::Team>> *teams() const {
     return GetPointer<const flatbuffers::Vector<flatbuffers::Offset<Upzp::GameStatus::Team>> *>(VT_TEAMS);
   }
@@ -322,6 +326,7 @@ struct Game FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   }
   bool Verify(flatbuffers::Verifier &verifier) const {
     return VerifyTableStart(verifier) &&
+           VerifyField<uint64_t>(verifier, VT_SEQUENCE) &&
            VerifyOffsetRequired(verifier, VT_TEAMS) &&
            verifier.VerifyVector(teams()) &&
            verifier.VerifyVectorOfTables(teams()) &&
@@ -337,6 +342,9 @@ struct GameBuilder {
   typedef Game Table;
   flatbuffers::FlatBufferBuilder &fbb_;
   flatbuffers::uoffset_t start_;
+  void add_sequence(uint64_t sequence) {
+    fbb_.AddElement<uint64_t>(Game::VT_SEQUENCE, sequence, 0);
+  }
   void add_teams(flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<Upzp::GameStatus::Team>>> teams) {
     fbb_.AddOffset(Game::VT_TEAMS, teams);
   }
@@ -360,10 +368,12 @@ struct GameBuilder {
 
 inline flatbuffers::Offset<Game> CreateGame(
     flatbuffers::FlatBufferBuilder &_fbb,
+    uint64_t sequence = 0,
     flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<Upzp::GameStatus::Team>>> teams = 0,
     flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<Upzp::GameStatus::PointBox>>> boxes = 0,
     bool finished = false) {
   GameBuilder builder_(_fbb);
+  builder_.add_sequence(sequence);
   builder_.add_boxes(boxes);
   builder_.add_teams(teams);
   builder_.add_finished(finished);
@@ -372,6 +382,7 @@ inline flatbuffers::Offset<Game> CreateGame(
 
 inline flatbuffers::Offset<Game> CreateGameDirect(
     flatbuffers::FlatBufferBuilder &_fbb,
+    uint64_t sequence = 0,
     const std::vector<flatbuffers::Offset<Upzp::GameStatus::Team>> *teams = nullptr,
     const std::vector<flatbuffers::Offset<Upzp::GameStatus::PointBox>> *boxes = nullptr,
     bool finished = false) {
@@ -379,6 +390,7 @@ inline flatbuffers::Offset<Game> CreateGameDirect(
   auto boxes__ = boxes ? _fbb.CreateVector<flatbuffers::Offset<Upzp::GameStatus::PointBox>>(*boxes) : 0;
   return Upzp::GameStatus::CreateGame(
       _fbb,
+      sequence,
       teams__,
       boxes__,
       finished);

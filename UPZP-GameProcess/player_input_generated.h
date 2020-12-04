@@ -17,12 +17,16 @@ struct Input FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   typedef InputBuilder Builder;
   enum FlatBuffersVTableOffset FLATBUFFERS_VTABLE_UNDERLYING_TYPE {
     VT_SEQUENCE = 4,
-    VT_DISCONNECT = 6,
-    VT_DIRECTION = 8,
-    VT_MOVE = 10
+    VT_ID = 6,
+    VT_DISCONNECT = 8,
+    VT_DIRECTION = 10,
+    VT_MOVE = 12
   };
   uint64_t sequence() const {
     return GetField<uint64_t>(VT_SEQUENCE, 0);
+  }
+  uint32_t id() const {
+    return GetField<uint32_t>(VT_ID, 0);
   }
   bool disconnect() const {
     return GetField<uint8_t>(VT_DISCONNECT, 0) != 0;
@@ -36,6 +40,7 @@ struct Input FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   bool Verify(flatbuffers::Verifier &verifier) const {
     return VerifyTableStart(verifier) &&
            VerifyField<uint64_t>(verifier, VT_SEQUENCE) &&
+           VerifyField<uint32_t>(verifier, VT_ID) &&
            VerifyField<uint8_t>(verifier, VT_DISCONNECT) &&
            VerifyField<float>(verifier, VT_DIRECTION) &&
            VerifyField<uint8_t>(verifier, VT_MOVE) &&
@@ -49,6 +54,9 @@ struct InputBuilder {
   flatbuffers::uoffset_t start_;
   void add_sequence(uint64_t sequence) {
     fbb_.AddElement<uint64_t>(Input::VT_SEQUENCE, sequence, 0);
+  }
+  void add_id(uint32_t id) {
+    fbb_.AddElement<uint32_t>(Input::VT_ID, id, 0);
   }
   void add_disconnect(bool disconnect) {
     fbb_.AddElement<uint8_t>(Input::VT_DISCONNECT, static_cast<uint8_t>(disconnect), 0);
@@ -73,12 +81,14 @@ struct InputBuilder {
 inline flatbuffers::Offset<Input> CreateInput(
     flatbuffers::FlatBufferBuilder &_fbb,
     uint64_t sequence = 0,
+    uint32_t id = 0,
     bool disconnect = false,
     float direction = 0.0f,
     bool move = false) {
   InputBuilder builder_(_fbb);
   builder_.add_sequence(sequence);
   builder_.add_direction(direction);
+  builder_.add_id(id);
   builder_.add_move(move);
   builder_.add_disconnect(disconnect);
   return builder_.Finish();

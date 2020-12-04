@@ -30,9 +30,9 @@ int main() {
   //dp.SetPayload(test_payload, sizeof(test_payload));
   //auto test_datagram = dp.Get();
 
-  auto moced_datagram =
+  auto mocked_datagram =
       upzp::mocker::MockInputDatagram(1, 0x103, true, 123.456f);
-  auto data = moced_datagram.Get();
+  auto data = mocked_datagram.Get();
   for (auto c : data) printf("%02hhx", c);
   std::cout << std::endl << std::endl;
 
