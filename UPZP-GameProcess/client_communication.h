@@ -3,6 +3,7 @@
 #include "client_udp.h"
 #include <asio.hpp>
 #include <vector>
+#include <thread>
 
 namespace upzp::client_com {
 
@@ -16,7 +17,12 @@ class ClientCommunication {
   asio::ip::udp::socket socket_;
   asio::ip::udp::endpoint remote_endpoint_;
   std::vector<ClientUdp> clients_;
-  std::vector<char> buffer_;
+  std::vector<char> receive_buffer_;
+  std::vector<char> transmit_buffer_;
+  std::thread transmit_thread_;
+
+  void StartReceive();
+  void StartTransmit();
 
  public:
   ClientCommunication(asio::io_context& context, const unsigned int port);

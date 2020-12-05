@@ -11,8 +11,8 @@ namespace upzp::client_com {
  * @param ip Client's IP v4.
 */
 ClientUdp::ClientUdp(const std::string name, const uint32_t id,
-                     const VehicleType vehicle, const std::string ip)
-    : Client(name, id, vehicle, ip) {
+  const VehicleType vehicle, const std::string ip, const unsigned int port)
+  : Client(name, id, vehicle, ip, port), remote_endpoint_(asio::ip::make_address(ip), port) {
   input_.id = this->id_;
   input_.move = false;
   input_.direction = 0.0f;
@@ -24,7 +24,7 @@ ClientUdp::ClientUdp(const std::string name, const uint32_t id,
  * @brief Contrctor.
  * @param client Client.
 */
-ClientUdp::ClientUdp(Client& client) : ClientUdp(client.Name(), client.Id(), client.Vehicle(), client.Ip_v4()) {}
+ClientUdp::ClientUdp(Client& client) : ClientUdp(client.Name(), client.Id(), client.Vehicle(), client.Ip_v4(), client.Port()) {}
 
 /**
  * @brief Decode received datagram.

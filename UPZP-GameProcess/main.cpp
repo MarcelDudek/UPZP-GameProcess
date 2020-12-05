@@ -32,7 +32,7 @@ int main() {
   try {
     asio::io_context context;
     upzp::client_com::ClientCommunication client_comm(context, 2137);
-    upzp::Client client("test", 0x103, upzp::VehicleType::CAR, "127.0.0.1");
+    upzp::Client client("test", 0x103, upzp::VehicleType::CAR, "127.0.0.1", 8585);
     client_comm.AddClient(client);
     client_comm.Start();
     context.run();  

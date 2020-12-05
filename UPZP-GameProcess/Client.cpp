@@ -10,7 +10,7 @@ namespace upzp {
  * @param ip Client's IP v4.
 */
 Client::Client(const std::string name, const uint32_t id, 
-  const VehicleType vehicle, const std::string ip) : name_(name), id_(id), vehicle_(vehicle), ip_v4_(ip) {}
+  const VehicleType vehicle, const std::string ip, const unsigned int port) : name_(name), id_(id), vehicle_(vehicle), ip_v4_(ip), port_(port) {}
 
 
 /**
@@ -38,5 +38,13 @@ VehicleType Client::Vehicle() const { return vehicle_; }
  * @return IP v4.
 */
 std::string Client::Ip_v4() const { return ip_v4_; }
+
+/**
+ * @brief Get client's communication port.
+ * @return Port number.
+*/
+unsigned int Client::Port() const {
+  return port_;
+}
 
 }  // namespace upzp

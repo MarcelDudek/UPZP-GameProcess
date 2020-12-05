@@ -18,10 +18,10 @@ class ClientUdp : public Client {
   uint64_t last_sequence_;
 
  public:
-  ClientUdp(const std::string name, const uint32_t id, const VehicleType vehicle, const std::string ip);
+  ClientUdp(const std::string name, const uint32_t id, const VehicleType vehicle, const std::string ip, const unsigned int port);
   ClientUdp(Client& client);
 
-  asio::ip::udp::endpoint remote_endpoint_;  /**< Client remote endpoint for communication. */
+  const asio::ip::udp::endpoint remote_endpoint_;  /**< Client remote endpoint for communication. */
   bool DecodeDatagram(const char* buffer, const size_t size);
   PlayerInput Input();
 };
