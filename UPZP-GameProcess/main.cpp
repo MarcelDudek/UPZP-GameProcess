@@ -5,7 +5,6 @@
 
 #include "client_communication.h"
 #include "datagram.h"
-#include "udp_communication_mocker.h"
 #include <asio.hpp>
 #include <iostream>
 #include <iomanip>
@@ -29,12 +28,6 @@ int main() {
   //dp.SetPayloadChecksum(true);
   //dp.SetPayload(test_payload, sizeof(test_payload));
   //auto test_datagram = dp.Get();
-
-  auto mocked_datagram =
-      upzp::mocker::MockInputDatagram(1, 0x103, true, 123.456f);
-  auto data = mocked_datagram.Get();
-  for (auto c : data) printf("%02hhx", c);
-  std::cout << std::endl << std::endl;
 
   try {
     asio::io_context context;
