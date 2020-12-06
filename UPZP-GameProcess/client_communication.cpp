@@ -12,7 +12,12 @@ namespace upzp::client_com {
 ClientCommunication::ClientCommunication(asio::io_context& context,
                                          const unsigned int port)
     : socket_(context, asio::ip::udp::endpoint(asio::ip::udp::v4(), port)),
-      receive_buffer_(RECEIVE_BUFFER_SIZE) {}
+      receive_buffer_(RECEIVE_BUFFER_SIZE), transmit_timer_(context, std::chrono::milliseconds(3000)) {
+  transmit_buffer_.push_back('t');
+  transmit_buffer_.push_back('e');
+  transmit_buffer_.push_back('s');
+  transmit_buffer_.push_back('t');
+}
 
 /**
  * @brief Add client.
@@ -73,19 +78,15 @@ void ClientCommunication::StartReceive() {
  * @brief Start transmiting thread.
 */
 void ClientCommunication::StartTransmit() {
-  transmit_buffer_.push_back('t');
-  transmit_buffer_.push_back('e');
-  transmit_buffer_.push_back('s');
-  transmit_buffer_.push_back('t');
-
-  transmit_thread_ = std::thread([this]() {
-    while (true) {
-      for (auto& client : clients_) {
-        socket_.async_send_to(asio::buffer(transmit_buffer_.data(), transmit_buffer_.size()), client.remote_endpoint_, [this](const asio::error_code& error, std::size_t bytes_transfered) {});
-      }
-      using namespace std::chrono_literals;
-      std::this_thread::sleep_for(1000ms);
+  transmit_timer_.expires_after(std::chrono::milliseconds(3000));
+  transmit_timer_.async_wait([this](const asio::error_code& error) {
+    for (auto& client : clients_) {
+      socket_.async_send_to(asio::buffer(transmit_buffer_.data(), transmit_buffer_.size()), client.remote_endpoint_,
+        [this](const asio::error_code& error, std::size_t bytes_transfered) {
+          std::cout << "Transmitted " << bytes_transfered << " bytes of data.\n";
+        });
     }
+    StartTransmit();
     });
 }
 

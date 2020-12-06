@@ -19,7 +19,7 @@ class ClientCommunication {
   std::vector<ClientUdp> clients_;
   std::vector<char> receive_buffer_;
   std::vector<char> transmit_buffer_;
-  std::thread transmit_thread_;
+  asio::high_resolution_timer transmit_timer_;
 
   void StartReceive();
   void StartTransmit();
