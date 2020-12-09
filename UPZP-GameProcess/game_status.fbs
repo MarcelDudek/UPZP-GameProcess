@@ -10,8 +10,8 @@ enum Vehicle:byte {Pedestrian, Cyclist, Car}
 /// Postion on the planet, represented by
 /// geographic coordinates.
 struct Position {
-  long:double;
-  lat:double;
+  longitude:double;
+  latitude:double;
 }
 
 

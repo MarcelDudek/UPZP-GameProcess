@@ -61,23 +61,23 @@ inline const char *EnumNameVehicle(Vehicle e) {
 /// geographic coordinates.
 FLATBUFFERS_MANUALLY_ALIGNED_STRUCT(8) Position FLATBUFFERS_FINAL_CLASS {
  private:
-  double long__;
-  double lat_;
+  double longitude_;
+  double latitude_;
 
  public:
   Position()
-      : long_(0),
-        lat_(0) {
+      : longitude_(0),
+        latitude_(0) {
   }
-  Position(double _long_, double _lat)
-      : long__(flatbuffers::EndianScalar(_long_)),
-        lat_(flatbuffers::EndianScalar(_lat)) {
+  Position(double _longitude, double _latitude)
+      : longitude_(flatbuffers::EndianScalar(_longitude)),
+        latitude_(flatbuffers::EndianScalar(_latitude)) {
   }
-  double long_() const {
-    return flatbuffers::EndianScalar(long__);
+  double longitude() const {
+    return flatbuffers::EndianScalar(longitude_);
   }
-  double lat() const {
-    return flatbuffers::EndianScalar(lat_);
+  double latitude() const {
+    return flatbuffers::EndianScalar(latitude_);
   }
 };
 FLATBUFFERS_STRUCT_END(Position, 16);
