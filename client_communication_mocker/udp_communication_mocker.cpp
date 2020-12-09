@@ -5,7 +5,7 @@ namespace upzp::mocker {
 
 Datagram MockInputDatagram(std::size_t seq, uint32_t id, bool move, float dir) {
   Datagram retval;
-  retval.SetVersion(1);
+  retval.SetVersion(101);
   retval.SetPayloadChecksum(false);
 
   flatbuffers::FlatBufferBuilder builder(1024);

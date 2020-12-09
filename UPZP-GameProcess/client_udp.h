@@ -12,7 +12,7 @@ namespace upzp::client_com {
 */
 class ClientUdp : public Client {
  private:
-  static constexpr int DATAGRAM_PLAYER_INPUT_VER = 1;
+  static constexpr int DATAGRAM_PLAYER_INPUT_VER = 101;
 
   PlayerInput input_;
   uint64_t last_sequence_;

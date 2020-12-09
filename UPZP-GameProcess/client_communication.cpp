@@ -154,7 +154,7 @@ void ClientCommunication::GenerateGameStatus(uint64_t seq_num) {
   builder.Finish(game);
   transmit_buffer_ = std::vector<char>(builder.GetSize());
   Datagram datagram;
-  datagram.SetVersion(2);
+  datagram.SetVersion(GAME_STATUS_VER);
   datagram.SetPayload(reinterpret_cast<const char*>(builder.GetBufferPointer()), builder.GetSize());
   datagram.SetPayloadChecksum(true);
   transmit_buffer_ = datagram.Get();

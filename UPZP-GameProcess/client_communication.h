@@ -15,6 +15,8 @@ namespace upzp::client_com {
 class ClientCommunication {
  private:
   static constexpr std::size_t RECEIVE_BUFFER_SIZE = 4096;
+  static constexpr int GAME_STATUS_VER = 100;
+  static constexpr int PLAYER_INPUT_VER = 101;
   const std::chrono::milliseconds game_status_period_;
 
   std::thread run_thread_;
