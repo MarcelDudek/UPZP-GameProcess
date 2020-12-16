@@ -1,0 +1,50 @@
+// UPZP's game status schema
+
+namespace Upzp.GameStatus;
+
+/// Possible vehicles for a player.
+enum Vehicle:byte {Pedestrian, Cyclist, Car}
+// ^^^ maybe should be changed to union later in the development
+
+
+/// Postion on the planet, represented by
+/// geographic coordinates.
+struct Position {
+  longitude:double;
+  latitude:double;
+}
+
+
+/// Player
+table Player {
+  name:string (required);
+  id:uint32;
+  points:int;
+  position:Position (required);
+  vehicle:Vehicle;
+}
+
+
+/// Team
+table Team {
+  points:int;
+  players:[Player] (required);
+}
+
+
+/// Point box that is collected by the players
+table PointBox {
+  position:Position (required);
+  value:int;
+}
+
+
+/// Game includes all information about current game status.
+table Game {
+  sequence:ulong;             // sequence number, should be incremented every tick
+  teams:[Team] (required);
+  boxes:[PointBox];
+  finished:bool = false;
+}
+
+root_type Game;
