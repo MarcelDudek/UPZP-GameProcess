@@ -1,9 +1,9 @@
-#include "datagram.h"
+#include "inc/datagram.h"
 
 #include <stdexcept>
 #include <string>
 
-#include "CRC.h"
+#include "../inc/CRC.h"
 
 namespace upzp {
 

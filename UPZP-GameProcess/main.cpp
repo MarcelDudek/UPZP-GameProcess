@@ -3,8 +3,8 @@
 #endif
 #define ASIO_STANDALONE
 
-#include "client_communication.h"
-#include "datagram.h"
+#include "client_communication/inc/client_communication.h"
+#include "datagram/inc/datagram.h"
 #include <asio.hpp>
 #include <iostream>
 #include <iomanip>

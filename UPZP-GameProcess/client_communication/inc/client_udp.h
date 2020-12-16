@@ -1,8 +1,8 @@
 #pragma once
 
-#include "client.h"
-#include "player_input.h"
-#include "player_input_generated.h"
+#include "../../inc/client.h"
+#include "../../inc/player_input.h"
+#include "../../inc/player_input_generated.h"
 #include <asio.hpp>
 
 namespace upzp::client_com {

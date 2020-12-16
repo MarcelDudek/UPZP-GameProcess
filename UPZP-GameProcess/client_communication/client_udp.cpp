@@ -1,5 +1,5 @@
-#include "client_udp.h"
-#include "datagram.h"
+#include "inc/client_udp.h"
+#include "../datagram/inc/datagram.h"
 
 namespace upzp::client_com {
 

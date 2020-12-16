@@ -1,6 +1,6 @@
-#include "client_communication.h"
-#include "game_status_generated.h"
-#include "datagram.h"
+#include "inc/client_communication.h"
+#include "../inc/game_status_generated.h"
+#include "../datagram/inc/datagram.h"
 #include <iostream>
 
 namespace upzp::client_com {
