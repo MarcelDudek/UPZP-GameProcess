@@ -25,6 +25,8 @@ class Game {
   Game(int64_t points_to_win, Coordinates map_placement, double map_radius);
   void SetPlayerInput(PlayerInput input);
   void AddPlayer(std::string name, uint32_t id, VehicleType vehicle, bool to_red_team);
+  bool RedTeamWon() const;
+  bool BlueTeamWon() const;
 };
 
 }  // namespace upzp::game_logic

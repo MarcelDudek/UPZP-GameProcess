@@ -48,4 +48,20 @@ void Game::AddPlayer(std::string name, uint32_t id, VehicleType vehicle, bool to
   to_red_team ? red_team_.AddPlayer(new_player) : blue_team_.AddPlayer(new_player);
 }
 
+/**
+ * @brief Did a red team win the game?
+ * @return Boolean.
+ */
+bool Game::RedTeamWon() const {
+  return red_team_.Score() >= points_to_win_;
+}
+
+/**
+ * @brief Did a blue team win the game?
+ * @return Boolean.
+ */
+bool Game::BlueTeamWon() const {
+  return blue_team_.Score() >= points_to_win_;
+}
+
 }  // namespace upzp::game_logic
