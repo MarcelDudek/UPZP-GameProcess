@@ -4,6 +4,7 @@
 #define ASIO_STANDALONE
 
 #include "client_communication/inc/client_communication.h"
+#include "game_logic/inc/game_logic.h"
 #include "datagram/inc/datagram.h"
 #include <asio.hpp>
 #include <iostream>
@@ -59,6 +60,15 @@ void LoadClient(upzp::client_com::ClientCommunication& comm) {
  * @return err_code
 */
 int main(int argc, char* argv[]) {
+  upzp::game_logic::GameLogic game;
+  game.NewGame(upzp::Maps::WROCLAW);
+  upzp::Client cl_1("test_1", 0x100, upzp::VehicleType::CAR, "127.0.0.1", 1000);
+  upzp::Client cl_2("test_2", 0x101, upzp::VehicleType::CYCLIST, "127.0.0.1", 1000);
+  upzp::Client cl_3("test_3", 0x102, upzp::VehicleType::PEDESTRIAN, "127.0.0.1", 1000);
+  game.AddPlayer(cl_1, true);
+  game.AddPlayer(cl_2, true);
+  game.AddPlayer(cl_3, false);
+
   std::unique_ptr<upzp::client_com::ClientCommunication> client_comm;
   try {
     client_comm = std::make_unique<upzp::client_com::ClientCommunication>(LoadClientCommPortArg(argc, argv));
