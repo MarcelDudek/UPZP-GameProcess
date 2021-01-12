@@ -51,7 +51,7 @@ void GameLogic::StartGame() {
  */
 void GameLogic::Tick() {
   mutex_.lock();
-  // TODO add movement calculation logic
+  game_->CalculateMovement(std::chrono::duration_cast<std::chrono::duration<double>>(tick_duration_));
   mutex_.unlock();
 }
 
