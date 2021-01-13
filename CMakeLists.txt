@@ -17,6 +17,7 @@ include_directories(
 include_directories(
         UPZP-GameProcess/inc
         UPZP-GameProcess/client_communication/inc
+        UPZP-GameProcess/mainproc_communication/inc
         UPZP-GameProcess/datagram/inc
         client_communication_mocker/inc)
 
@@ -26,7 +27,9 @@ add_executable(UPZP_GameProcess
         UPZP-GameProcess/client.cpp
         UPZP-GameProcess/datagram/datagram.cpp
         UPZP-GameProcess/client_communication/client_communication.cpp
-        UPZP-GameProcess/client_communication/client_udp.cpp)
+        UPZP-GameProcess/client_communication/client_udp.cpp
+        UPZP-GameProcess/mainproc_communication/mainproc_communication.cpp
+        UPZP-GameProcess/mainproc_communication/mainproc_tcp.cpp)
 
 add_executable(client_communication_mocker
         client_communication_mocker/main.cpp
