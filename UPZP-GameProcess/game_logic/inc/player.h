@@ -5,6 +5,7 @@
 #include "coordinates.h"
 #include "player_input.h"
 #include "vehicle_types.h"
+#include "game_status_generated.h"
 
 namespace upzp::game_logic {
 
@@ -32,6 +33,8 @@ class Player {
   void SetInput(PlayerInput input);
   void AddPoints(int64_t points);
   void ResetScore();
+  flatbuffers::Offset<Upzp::GameStatus::Player>
+    GenerateFlatbuffers(flatbuffers::FlatBufferBuilder&) const;
 };
 
 }  // namespace upzp::game_logic

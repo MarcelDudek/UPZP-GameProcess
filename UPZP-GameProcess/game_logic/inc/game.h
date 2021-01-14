@@ -7,6 +7,7 @@
 #include "coordinates.h"
 #include "Team.h"
 #include "point_box.h"
+#include "game_status_generated.h"
 
 namespace upzp::game_logic {
 
@@ -39,6 +40,7 @@ class Game {
   void SetPlayerInput(PlayerInput input);
   void AddPlayer(std::string name, uint32_t id, VehicleType vehicle, bool to_red_team);
   void GeneratePointBox();
+  void GenerateFlatbuffers(flatbuffers::FlatBufferBuilder&, uint64_t) const;
   void CalculateMovement(std::chrono::duration<double>);
   bool RedTeamWon() const;
   bool BlueTeamWon() const;

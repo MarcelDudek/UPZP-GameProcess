@@ -8,6 +8,7 @@
 #include "game.h"
 #include "maps.h"
 #include "client.h"
+#include "game_status_generated.h"
 
 namespace upzp::game_logic {
 
@@ -20,14 +21,17 @@ class GameLogic {
   bool game_started_ = false;
   std::thread game_thread_;
   std::mutex mutex_;
+  uint64_t serialization_seq_num_ = 0;
 
   void Tick();
+  bool GameFinished();
 
  public:
   GameLogic();
   void NewGame(Maps map);
   void AddPlayer(Client client, bool to_red_team);
   void StartGame();
+  void GetGameStatus(flatbuffers::FlatBufferBuilder&);
 };
 
 }  // namespace upzp::game_logic

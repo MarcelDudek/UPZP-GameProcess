@@ -13,6 +13,8 @@ class Team {
   void AddPlayer(Player);
   void SetPlayerInput(PlayerInput input);
   int64_t Score() const;
+  flatbuffers::Offset<Upzp::GameStatus::Team>
+    GenerateFlatbuffers(flatbuffers::FlatBufferBuilder&) const;
 };
 
 }  // namespace upzp::game_logic

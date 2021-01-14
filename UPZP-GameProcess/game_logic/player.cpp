@@ -90,4 +90,36 @@ void Player::SetInput(PlayerInput input) {
   input_ = input;
 }
 
+/**
+ * Generate player serialization using flatbuffers.
+ *
+ * @brief Generate flatbuffers player representation.
+ * @param builder Flatbuffers builder.
+ * @return Player flatbuffers offset.
+ */
+flatbuffers::Offset<Upzp::GameStatus::Player>
+    Player::GenerateFlatbuffers(flatbuffers::FlatBufferBuilder& builder) const {
+  auto name = builder.CreateString(name_);
+  auto position = Upzp::GameStatus::Position(position_.longitude, position_.latitude);
+
+  // check vehicle type
+  Upzp::GameStatus::Vehicle vehicle;
+  switch (vehicle_) {
+    case VehicleType::CYCLIST:
+      vehicle = Upzp::GameStatus::Vehicle::Vehicle_Cyclist;
+      break;
+    case VehicleType::PEDESTRIAN:
+      vehicle = Upzp::GameStatus::Vehicle::Vehicle_Pedestrian;
+      break;
+    case VehicleType::CAR:
+      vehicle = Upzp::GameStatus::Vehicle::Vehicle_Car;
+      break;
+    default:
+      vehicle = Upzp::GameStatus::Vehicle::Vehicle_Pedestrian;
+      break;
+  }
+
+  return Upzp::GameStatus::CreatePlayer(builder, name, id_, points_, &position, vehicle);
+}
+
 }  // namespace upzp::game_logic

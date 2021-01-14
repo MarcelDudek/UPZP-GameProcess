@@ -32,13 +32,13 @@ void GameLogic::AddPlayer(Client client, bool to_red_team) {
  * @brief Start the game thread.
  */
 void GameLogic::StartGame() {
-  if (!game_started_) {
+  if (!game_started_ && game_) {
     game_started_ = true;
     game_thread_ = std::thread([this](){
       do {  // game loop
         Tick();
         std::this_thread::sleep_for(tick_duration_);
-      } while (game_->BlueTeamWon() || game_->RedTeamWon());
+      } while (!GameFinished());
 
       // when the game has finished
       // TODO add logic
@@ -53,6 +53,34 @@ void GameLogic::Tick() {
   mutex_.lock();
   game_->CalculateMovement(std::chrono::duration_cast<std::chrono::duration<double>>(tick_duration_));
   mutex_.unlock();
+}
+
+/**
+ * Check if the game has finised which means
+ * that one of the teams has won the game.
+ *
+ * @brief Check if the game has finished.
+ * @return True if game finished.
+ */
+bool GameLogic::GameFinished() {
+  mutex_.lock();
+  bool ret_val = game_->BlueTeamWon() || game_->RedTeamWon();
+  mutex_.unlock();
+  return ret_val;
+}
+
+/**
+ * Get game status serialization using flatbuffers.
+ *
+ * @brief Get game status.
+ * @param builder Flatbuffers builder.
+ */
+void GameLogic::GetGameStatus(flatbuffers::FlatBufferBuilder& builder) {
+  if (game_) {
+    mutex_.lock();
+    game_->GenerateFlatbuffers(builder, ++serialization_seq_num_);
+    mutex_.unlock();
+  }
 }
 
 }  // namespace upsp::game_logic

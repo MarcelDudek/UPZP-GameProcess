@@ -217,4 +217,36 @@ double Game::LongitudeToMeters(double longitude, double latitude) const {
   return (EARTH_CIRCUMFERENCE * std::cos(latitude) / 360.0) * longitude;
 }
 
+/**
+ * Serialize game status data using flatbuffers.
+ *
+ * @brief Generate flatbuffers game status.
+ * @param builder Flatbuffers builder. The serialized data will be outputted
+ * into this builder.
+ * @param sequence_number Sequence number that will be put into the serialization.
+ */
+void Game::GenerateFlatbuffers(flatbuffers::FlatBufferBuilder& builder,
+                               uint64_t sequence_number) const {
+  // create both teams
+  auto red_team = red_team_.GenerateFlatbuffers(builder);
+  auto blue_team = blue_team_.GenerateFlatbuffers(builder);
+  std::vector<flatbuffers::Offset<Upzp::GameStatus::Team>> teams_vector;
+  teams_vector.push_back(red_team);
+  teams_vector.push_back(blue_team);
+  auto teams = builder.CreateVector(teams_vector);
+
+  // create point boxes
+  std::vector<flatbuffers::Offset<Upzp::GameStatus::PointBox>> point_boxes_vector;
+  for (auto& box : point_boxes_) {
+    auto box_position = Upzp::GameStatus::Position(box.position.longitude, box.position.latitude);
+    point_boxes_vector.push_back(
+        Upzp::GameStatus::CreatePointBox(builder, &box_position, box.value));
+  }
+  auto point_boxes = builder.CreateVector(point_boxes_vector);
+
+  auto game = Upzp::GameStatus::CreateGame(
+      builder, sequence_number, teams, point_boxes, RedTeamWon() || BlueTeamWon());
+  builder.Finish(game);
+}
+
 }  // namespace upzp::game_logic

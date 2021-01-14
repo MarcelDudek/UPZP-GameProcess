@@ -35,4 +35,22 @@ void Team::SetPlayerInput(PlayerInput input) {
   }
 }
 
+/**
+ * Generate team data serialization using flatbuffers.
+ *
+ * @brief Generate flatbuffers reprezentation of a team.
+ * @param builder Flatbuffers builder.
+ * @return Flatbuffers offset.
+ */
+flatbuffers::Offset<Upzp::GameStatus::Team>
+    Team::GenerateFlatbuffers(flatbuffers::FlatBufferBuilder& builder) const {
+  std::vector<flatbuffers::Offset<Upzp::GameStatus::Player>> players_vec;
+  for (auto& player : players_) {
+    players_vec.push_back(player.GenerateFlatbuffers(builder));
+  }
+  auto players = builder.CreateVector(players_vec);
+
+  return Upzp::GameStatus::CreateTeam(builder, Score(), players);
+}
+
 }  // namespace upzp::game_logic
