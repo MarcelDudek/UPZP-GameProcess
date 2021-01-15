@@ -5,7 +5,9 @@ namespace upzp::game_logic {
 /**
  * @brief Constructor.
  */
-GameLogic::GameLogic() : tick_duration_(1000 / TICK_RATE) {
+GameLogic::GameLogic() : tick_duration_(1000 / TICK_RATE),
+  last_point_box_spawn_(std::chrono::system_clock::now()),
+  point_box_spawn_period_(POINT_BOX_SPAWN_PERIOD) {
 }
 
 /**
@@ -54,6 +56,13 @@ void GameLogic::StartGame() {
  */
 void GameLogic::Tick() {
   mutex_.lock();
+  // check for point box spawn
+  auto now = std::chrono::system_clock::now();
+  if (now - last_point_box_spawn_ > point_box_spawn_period_) {
+    game_->GeneratePointBox();
+    last_point_box_spawn_ = now;
+  }
+
   game_->CalculateMovement(std::chrono::duration_cast<std::chrono::duration<double>>(tick_duration_));
   serialization_seq_num_++;
   mutex_.unlock();
