@@ -18,31 +18,31 @@ void Receive(asio::ip::udp::socket& socket, std::vector<char>& buffer) {
       });
 }
 
-void Transmit(asio::ip::udp::socket& socket, std::vector<char>& buffer, asio::high_resolution_timer& timer) {
+void Transmit(asio::ip::udp::socket& socket, asio::high_resolution_timer& timer) {
   using namespace std::chrono_literals;
   timer.expires_after(2000ms);
 
-  timer.async_wait([&socket, &buffer, &timer](const asio::error_code& error) {
-    asio::ip::udp::endpoint remote_endpoint = asio::ip::udp::endpoint(asio::ip::make_address("127.0.0.1"), 2137);
+  timer.async_wait([&socket, &timer](const asio::error_code& error) {
+    static size_t seq = 0;
+    auto datagram = upzp::mocker::MockInputDatagram(++seq, 1, true, 3.14);
+    auto buffer = datagram.Get();
+
+    asio::ip::udp::endpoint remote_endpoint = asio::ip::udp::endpoint(asio::ip::make_address("127.0.0.1"), 8550);
     socket.async_send_to(asio::buffer(buffer.data(), buffer.size()), remote_endpoint, [&remote_endpoint, &socket, &buffer](const asio::error_code& error,
       std::size_t bytes_transfered) {
         std::cout << "Transmited " << bytes_transfered << " bytes of data.\n";
       });
-    Transmit(socket, buffer, timer);
+    Transmit(socket, timer);
     });
 }
 
 int main() {
   asio::io_context context;
   std::vector<char> buffer(4096);
-  asio::ip::udp::socket socket(context, asio::ip::udp::endpoint(asio::ip::udp::v4(), 8585));
+  asio::ip::udp::socket socket(context, asio::ip::udp::endpoint(asio::ip::udp::v4(), 4000));
   asio::high_resolution_timer timer(context);
 
-  static size_t seq = 0;
-  auto datagram = upzp::mocker::MockInputDatagram(++seq, 0x1234, true, 3.14);
-  auto data = datagram.Get();
-
   Receive(socket, buffer);
-  Transmit(socket, data, timer);
+  Transmit(socket, timer);
   context.run();
 }

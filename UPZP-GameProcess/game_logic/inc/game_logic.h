@@ -8,6 +8,7 @@
 #include "game.h"
 #include "maps.h"
 #include "client.h"
+#include "player_input.h"
 #include "game_status_generated.h"
 
 namespace upzp::game_logic {
@@ -31,7 +32,9 @@ class GameLogic {
   void NewGame(Maps map);
   void AddPlayer(Client client, bool to_red_team);
   void StartGame();
+  bool Running();
   void GetGameStatus(flatbuffers::FlatBufferBuilder&);
+  void SetPlayerMovement(PlayerInput);
 };
 
 }  // namespace upzp::game_logic

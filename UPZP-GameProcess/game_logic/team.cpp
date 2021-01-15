@@ -26,7 +26,7 @@ int64_t Team::Score() const {
  * @brief Set player's input.
  * @param input Input.
  */
-void Team::SetPlayerInput(PlayerInput input) {
+void Team::SetPlayerInput(PlayerInput& input) {
   for (auto& player : players_) {
     if (player.Id() == input.id) {
       player.SetInput(input);

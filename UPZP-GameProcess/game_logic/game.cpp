@@ -19,7 +19,7 @@ Game::Game(int64_t points_to_win, Coordinates map_placement, double map_radius) 
  * @brief Set player input.
  * @param input Input.
  */
-void Game::SetPlayerInput(PlayerInput input) {
+void Game::SetPlayerInput(PlayerInput& input) {
   red_team_.SetPlayerInput(input);
   blue_team_.SetPlayerInput(input);
 }

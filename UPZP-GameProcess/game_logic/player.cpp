@@ -86,7 +86,7 @@ void Player::ResetScore() {
  * @brief Set player's input.
  * @param input New input.
  */
-void Player::SetInput(PlayerInput input) {
+void Player::SetInput(PlayerInput& input) {
   input_ = input;
 }
 

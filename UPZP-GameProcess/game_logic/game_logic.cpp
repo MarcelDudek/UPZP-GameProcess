@@ -24,7 +24,9 @@ void GameLogic::NewGame(Maps map) {
  */
 void GameLogic::AddPlayer(Client client, bool to_red_team) {
   if (game_) {
+    mutex_.lock();
     game_->AddPlayer(client.Name(), client.Id(), client.Vehicle(), to_red_team);
+    mutex_.unlock();
   }
 }
 
@@ -42,6 +44,7 @@ void GameLogic::StartGame() {
 
       // when the game has finished
       // TODO add logic
+      game_started_ = false;
     });
   }
 }
@@ -52,6 +55,7 @@ void GameLogic::StartGame() {
 void GameLogic::Tick() {
   mutex_.lock();
   game_->CalculateMovement(std::chrono::duration_cast<std::chrono::duration<double>>(tick_duration_));
+  serialization_seq_num_++;
   mutex_.unlock();
 }
 
@@ -78,9 +82,37 @@ bool GameLogic::GameFinished() {
 void GameLogic::GetGameStatus(flatbuffers::FlatBufferBuilder& builder) {
   if (game_) {
     mutex_.lock();
-    game_->GenerateFlatbuffers(builder, ++serialization_seq_num_);
+    game_->GenerateFlatbuffers(builder, serialization_seq_num_);
     mutex_.unlock();
   }
+}
+
+/**
+ * Set player's movement using received input.
+ *
+ * @brief Set player's movement.
+ * @param input Player's input.
+ */
+void GameLogic::SetPlayerMovement(PlayerInput input) {
+  if (game_) {
+    mutex_.lock();
+    game_->SetPlayerInput(input);
+    mutex_.unlock();
+  }
+}
+
+/**
+ * Is the game thread running?
+ *
+ * @brief Check if the game is running.
+ * @return True for game thread running.
+ */
+bool GameLogic::Running() {
+  bool ret_val;
+  mutex_.lock();
+  ret_val =  game_started_;
+  mutex_.unlock();
+  return ret_val;
 }
 
 }  // namespace upsp::game_logic

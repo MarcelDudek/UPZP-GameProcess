@@ -1,7 +1,7 @@
 #include "inc/client_communication.h"
-#include "../inc/game_status_generated.h"
 #include "../datagram/inc/datagram.h"
 #include <iostream>
+#include <utility>
 
 namespace upzp::client_com {
 
@@ -12,8 +12,6 @@ namespace upzp::client_com {
 ClientCommunication::ClientCommunication(const unsigned int port)
     : socket_(context_, asio::ip::udp::endpoint(asio::ip::udp::v4(), port)),
       receive_buffer_(RECEIVE_BUFFER_SIZE), transmit_timer_(context_), game_status_period_(1000) {
-  running_ = false;
-  sequence_number_ = 1;
 }
 
 /**
@@ -64,7 +62,9 @@ void ClientCommunication::StartReceive() {
       for (auto& client : clients_) {  // check all clients for coresponding address
         if (remote_endpoint_.address().to_string() == client.Ip_v4() && remote_endpoint_.port() == client.Port()) {
           try {
-            client.DecodeDatagram(receive_buffer_.data(), bytes_transfered);
+            bool good_read = client.DecodeDatagram(receive_buffer_.data(), bytes_transfered);
+            if (good_read && game_logic_)
+              game_logic_->SetPlayerMovement(client.Input());
           }
           catch (std::exception& ex) {}
           //std::cout << "Received from " << remote_endpoint_.address().to_string() << ":" << remote_endpoint_.port()
@@ -84,7 +84,9 @@ void ClientCommunication::StartReceive() {
 void ClientCommunication::StartTransmit() {
   transmit_timer_.expires_after(game_status_period_);
   transmit_timer_.async_wait([this](const asio::error_code& error) {
-    GenerateGameStatus(sequence_number_++);
+    if (!game_logic_)  // if there is no loaded game logic, abort sending game status
+      StartTransmit();
+    GetGameStatusIntoTransmitBuffer();
     clients_mutex_.lock();
     for (auto& client : clients_) {  // send game status to every client
       socket_.async_send_to(asio::buffer(transmit_buffer_.data(), transmit_buffer_.size()), client.remote_endpoint_,
@@ -99,65 +101,33 @@ void ClientCommunication::StartTransmit() {
 }
 
 /**
- * @brief Gamerate game status (mocker function).
- * @param seq_num Sequence number.
+ * Serialize game status using flatbuffers. Then pack
+ * it into datagram and into the transmit buffer.
+ *
+ * @brief Get game status info into transmit buffer.
 */
-void ClientCommunication::GenerateGameStatus(uint64_t seq_num) {
-  flatbuffers::FlatBufferBuilder builder(4096);
+void ClientCommunication::GetGameStatusIntoTransmitBuffer() {
+  if (game_logic_) {
+    flatbuffers::FlatBufferBuilder builder(4096);
+    game_logic_->GetGameStatus(builder);
+    transmit_buffer_ = std::vector<char>(builder.GetSize());
+    Datagram datagram;
+    datagram.SetVersion(GAME_STATUS_VER);
+    datagram.SetPayload(reinterpret_cast<const char*>(builder.GetBufferPointer()), builder.GetSize());
+    datagram.SetPayloadChecksum(true);
+    transmit_buffer_ = datagram.Get();
+  }
+}
 
-  // create players
-  auto player_1_name = builder.CreateString("player_1");
-  auto player_2_name = builder.CreateString("player_2");
-  auto player_3_name = builder.CreateString("player_3");
-  auto player_4_name = builder.CreateString("player_4");
-  auto player_1_position = Upzp::GameStatus::Position(17.059766, 51.111141);
-  auto player_2_position = Upzp::GameStatus::Position(17.064647, 51.114305);
-  auto player_3_position = Upzp::GameStatus::Position(17.058302, 51.107071);
-  auto player_4_position = Upzp::GameStatus::Position(17.053932, 51.104906);
-  auto player_1 = Upzp::GameStatus::CreatePlayer(builder, player_1_name, 0x100, 5200, &player_1_position, Upzp::GameStatus::Vehicle::Vehicle_Car);
-  auto player_2 = Upzp::GameStatus::CreatePlayer(builder, player_2_name, 0x200, 2330, &player_2_position, Upzp::GameStatus::Vehicle::Vehicle_Car);
-  auto player_3 = Upzp::GameStatus::CreatePlayer(builder, player_3_name, 0x300, 3010, &player_3_position, Upzp::GameStatus::Vehicle::Vehicle_Car);
-  auto player_4 = Upzp::GameStatus::CreatePlayer(builder, player_4_name, 0x400, 4444, &player_4_position, Upzp::GameStatus::Vehicle::Vehicle_Car);
-
-  // create teams
-  std::vector<flatbuffers::Offset<Upzp::GameStatus::Player>> team_1_players_vec;
-  std::vector<flatbuffers::Offset<Upzp::GameStatus::Player>> team_2_players_vec;
-  team_1_players_vec.push_back(player_2);
-  team_1_players_vec.push_back(player_1);
-  team_2_players_vec.push_back(player_3);
-  team_2_players_vec.push_back(player_4);
-  auto team_1_players = builder.CreateVector(team_1_players_vec);
-  auto team_2_players = builder.CreateVector(team_2_players_vec);
-  auto team_1 = Upzp::GameStatus::CreateTeam(builder, 7530, team_1_players);
-  auto team_2 = Upzp::GameStatus::CreateTeam(builder, 7454, team_2_players);
-
-  // create boxes
-  auto box_1_position = Upzp::GameStatus::Position(17.059235, 51.109738);
-  auto box_2_position = Upzp::GameStatus::Position(17.057037, 51.113315);
-  auto box_3_position = Upzp::GameStatus::Position(17.052791, 51.109543);
-  auto box_1 = Upzp::GameStatus::CreatePointBox(builder, &box_1_position, 100);
-  auto box_2 = Upzp::GameStatus::CreatePointBox(builder, &box_2_position, 100);
-  auto box_3 = Upzp::GameStatus::CreatePointBox(builder, &box_3_position, 100);
-
-  // create game
-  std::vector<flatbuffers::Offset<Upzp::GameStatus::PointBox>> point_boxes_vector;
-  point_boxes_vector.push_back(box_1);
-  point_boxes_vector.push_back(box_2);
-  point_boxes_vector.push_back(box_3);
-  auto point_boxes = builder.CreateVector(point_boxes_vector);
-  std::vector<flatbuffers::Offset<Upzp::GameStatus::Team>> teams_vector;
-  teams_vector.push_back(team_1);
-  teams_vector.push_back(team_2);
-  auto teams = builder.CreateVector(teams_vector);
-  auto game = Upzp::GameStatus::CreateGame(builder, seq_num, teams, point_boxes, false);
-
-  builder.Finish(game);
-  transmit_buffer_ = std::vector<char>(builder.GetSize());
-  Datagram datagram;
-  datagram.SetVersion(GAME_STATUS_VER);
-  datagram.SetPayload(reinterpret_cast<const char*>(builder.GetBufferPointer()), builder.GetSize());
-  datagram.SetPayloadChecksum(true);
-  transmit_buffer_ = datagram.Get();
+/**
+ * Assign game logic handler which will be used to get
+ * game status from as well as to give players' input.
+ *
+ * @brief Assign game logic handler to the communication.
+ * @param logic Game logic handler shared pointer.
+ */
+void ClientCommunication::AssignGameLogic(std::shared_ptr<game_logic::GameLogic> logic) {
+  game_logic_ = std::move(logic);
 }
 
 }  // namespace upzp::client_com

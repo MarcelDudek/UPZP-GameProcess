@@ -30,7 +30,7 @@ class Player {
   VehicleType Vehicle() const;
   PlayerInput Input() const;
   void SetPosition(Coordinates coords);
-  void SetInput(PlayerInput input);
+  void SetInput(PlayerInput& input);
   void AddPoints(int64_t points);
   void ResetScore();
   flatbuffers::Offset<Upzp::GameStatus::Player>

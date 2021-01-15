@@ -1,6 +1,7 @@
 #pragma once
 
 #include "client_udp.h"
+#include "game_logic.h"
 #include <asio.hpp>
 #include <vector>
 #include <thread>
@@ -10,7 +11,11 @@
 namespace upzp::client_com {
 
 /**
+ * Client communication is receiving player's input
+ * and transmitting game status to and from all clients.
+ *
  * @brief Client communication main class.
+ * @todo Add client disconnect and timeout handling.
 */
 class ClientCommunication {
  private:
@@ -20,9 +25,9 @@ class ClientCommunication {
   const std::chrono::milliseconds game_status_period_;
 
   std::thread run_thread_;
-  bool running_;
+  bool running_ = false;
 
-  uint64_t sequence_number_;
+  std::shared_ptr<game_logic::GameLogic> game_logic_;
 
   asio::io_context context_;
   asio::ip::udp::socket socket_;
@@ -35,15 +40,16 @@ class ClientCommunication {
   // mutexes
   std::mutex clients_mutex_;
 
-  void GenerateGameStatus(uint64_t seq_num);
+  void GetGameStatusIntoTransmitBuffer();
 
   void StartReceive();
   void StartTransmit();
 
  public:
-  ClientCommunication(const unsigned int port);
+  explicit ClientCommunication(const unsigned int port);
   void AddClient(Client client);
   void AddClient(std::vector<Client>& client);
+  void AssignGameLogic(std::shared_ptr<game_logic::GameLogic>);
   void Start();
 };
 

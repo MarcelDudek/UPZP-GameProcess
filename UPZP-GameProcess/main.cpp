@@ -39,18 +39,35 @@ int LoadClientCommPortArg(int argc, char* argv[]) {
  * @brief Load client from std input.
  * @param comm Reference to client communication, where loaded client will be added.
 */
-void LoadClient(upzp::client_com::ClientCommunication& comm) {
-  std::cout << "Add new client (example input 127.0.0.1:9000): ";
-
+void LoadClient(upzp::client_com::ClientCommunication& comm, upzp::game_logic::GameLogic& game_logic) {
+  // load client's IPv4 address
   std::string client_address;
+  std::cout << "Add new client (example input 127.0.0.1:9000): ";
   std::cin >> client_address;
 
+  // get address and port from a string
   std::string ip = client_address.substr(0, client_address.find_first_of(':'));
   std::string port_str = client_address.substr(client_address.find_first_of(':') + 1);
   int port = std::stoi(port_str);
-  static uint32_t id = 1;
-  upzp::Client client("name", id++, upzp::VehicleType::CAR, ip, port);
+
+  // load client name
+  std::string name;
+  std::cout << "Client name: ";
+  std::cin >> name;
+
+  // load client id
+  uint32_t id;
+  std::cout << "Client ID: ";
+  std::cin >> id;
+
+  // load to which team
+  bool to_red_team;
+  std::cout << "Add to red team (1/0): ";
+  std::cin >> to_red_team;
+
+  upzp::Client client(name, id++, upzp::VehicleType::CAR, ip, port);
   comm.AddClient(client);
+  game_logic.AddPlayer(client, to_red_team);
 }
 
 /**
@@ -60,27 +77,23 @@ void LoadClient(upzp::client_com::ClientCommunication& comm) {
  * @return err_code
 */
 int main(int argc, char* argv[]) {
-  upzp::game_logic::GameLogic game;
-  game.NewGame(upzp::Maps::WROCLAW);
-  upzp::Client cl_1("test_1", 0x100, upzp::VehicleType::CAR, "127.0.0.1", 1000);
-  upzp::Client cl_2("test_2", 0x101, upzp::VehicleType::CYCLIST, "127.0.0.1", 1000);
-  upzp::Client cl_3("test_3", 0x102, upzp::VehicleType::PEDESTRIAN, "127.0.0.1", 1000);
-  game.AddPlayer(cl_1, true);
-  game.AddPlayer(cl_2, true);
-  game.AddPlayer(cl_3, false);
-
+  auto game_logic = std::make_shared<upzp::game_logic::GameLogic>();
+  game_logic->NewGame(upzp::Maps::WROCLAW);
   std::unique_ptr<upzp::client_com::ClientCommunication> client_comm;
   try {
     client_comm = std::make_unique<upzp::client_com::ClientCommunication>(LoadClientCommPortArg(argc, argv));
+    client_comm->AssignGameLogic(game_logic);
+    game_logic->StartGame();
     client_comm->Start();
   } catch (std::exception& ex) {
     std::cout << ex.what() << std::endl;
   }
 
   // loop to keep application alive
-  while (true) {
-    LoadClient(*client_comm.get());
+  while (game_logic->Running()) {
+    LoadClient(*client_comm, *game_logic);
     //using namespace std::chrono_literals;
     //std::this_thread::sleep_for(5min);
   }
+  // TODO add exit logic
 }

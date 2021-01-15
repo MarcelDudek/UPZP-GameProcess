@@ -31,6 +31,8 @@ ClientUdp::ClientUdp(Client& client) : ClientUdp(client.Name(), client.Id(), cli
  * @param buffer Datagram's buffer.
  * @param size Buffer's size.
  * @return True for succesful decode.
+ * If seq num is lower than current
+ * false is also returned.
 */
 bool ClientUdp::DecodeDatagram(const char* buffer, const size_t size) {
   Datagram datagram;
@@ -43,12 +45,12 @@ bool ClientUdp::DecodeDatagram(const char* buffer, const size_t size) {
       input_.move = input->move();
       input_.direction = input->direction();
       last_sequence_ = input->sequence();
+      return true;
     }
+    else return false;
   }
   else
     return false;
-
-  return true;
 }
 
 /**

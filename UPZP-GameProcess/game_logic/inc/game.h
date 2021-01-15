@@ -37,7 +37,7 @@ class Game {
   Team red_team_, blue_team_;
 
   Game(int64_t points_to_win, Coordinates map_placement, double map_radius);
-  void SetPlayerInput(PlayerInput input);
+  void SetPlayerInput(PlayerInput& input);
   void AddPlayer(std::string name, uint32_t id, VehicleType vehicle, bool to_red_team);
   void GeneratePointBox();
   void GenerateFlatbuffers(flatbuffers::FlatBufferBuilder&, uint64_t) const;

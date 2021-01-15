@@ -9,7 +9,7 @@ Datagram MockInputDatagram(std::size_t seq, uint32_t id, bool move, float dir) {
   retval.SetPayloadChecksum(false);
 
   flatbuffers::FlatBufferBuilder builder(1024);
-  auto input = Upzp::PlayerInput::CreateInput(builder, seq, false, dir, move);
+  auto input = Upzp::PlayerInput::CreateInput(builder, seq, id, false, dir, move);
   builder.Finish(input);
   retval.SetPayload(reinterpret_cast<char*>(builder.GetBufferPointer()), builder.GetSize());
   return retval;
