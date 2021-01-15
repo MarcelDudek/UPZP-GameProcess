@@ -11,7 +11,7 @@ namespace upzp::client_com {
  */
 ClientCommunication::ClientCommunication(const unsigned int port)
     : socket_(context_, asio::ip::udp::endpoint(asio::ip::udp::v4(), port)),
-      receive_buffer_(RECEIVE_BUFFER_SIZE), transmit_timer_(context_), game_status_period_(1000) {
+      receive_buffer_(RECEIVE_BUFFER_SIZE), transmit_timer_(context_), game_status_period_(50) {
 }
 
 /**

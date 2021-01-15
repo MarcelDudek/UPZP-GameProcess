@@ -13,6 +13,7 @@ void Receive(asio::ip::udp::socket& socket, std::vector<char>& buffer) {
                         std::size_t bytes_transfered) {
         std::cout << "Received " << bytes_transfered << " bytes of data from " << remote_endpoint_g.address().to_string()
           << ":" << remote_endpoint_g.port() << std::endl;
+        std::cout << upzp::mocker::DecodeGameStatus(buffer.data(), bytes_transfered) << std::endl;
         using namespace std::chrono_literals;
         Receive(socket, buffer);
       });
