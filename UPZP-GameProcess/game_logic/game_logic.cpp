@@ -1,5 +1,14 @@
 #include "inc/game_logic.h"
+#include <ctime>
 #include "mysql_connection.h"
+#include <cppconn/driver.h>
+#include <cppconn/exception.h>
+#include <cppconn/resultset.h>
+#include <cppconn/statement.h>
+#include <cppconn/prepared_statement.h>
+
+#include <utility>
+
 
 namespace upzp::game_logic {
 
@@ -13,13 +22,16 @@ GameLogic::GameLogic() : tick_duration_(1000 / TICK_RATE),
 
 /**
  * @brief Start a new game.
- * @param map Map to be played.
+ * @param start_point Start point of the map
+ * @param radius Radius of the map in meters.
+ * @param map_name Name of the map.
  * @param game_id ID of the game that will be send to database.
+ * @param point_to_win
  */
-void GameLogic::NewGame(Maps map, uint32_t game_id) {
-  Coordinates start_point {MapsLongitude(map), MapsLatitude(map)};
-  game_ = std::make_unique<Game>(1000, start_point, 2000.0);
+void GameLogic::NewGame(Coordinates start_point, double radius, std::string map_name, uint32_t game_id, uint64_t point_to_win) {
+  game_ = std::make_unique<Game>(point_to_win, start_point, radius);
   game_id_ = game_id;
+  map_name_ = std::move(map_name);
 }
 
 /**
@@ -40,14 +52,20 @@ void GameLogic::AddPlayer(Client client, bool to_red_team) {
  */
 void GameLogic::StartGame() {
   if (!game_started_ && game_) {
+    start_point_ = std::chrono::system_clock::now();
     game_started_ = true;
     game_thread_ = std::thread([this](){
+      auto t1 = std::chrono::system_clock::now();  // delete later! just for testing!
+      decltype(t1) t2;
+
       do {  // game loop
         Tick();
         std::this_thread::sleep_for(tick_duration_);
-      } while (!GameFinished());
-
+        t2 = std::chrono::system_clock::now();
+      } while (!GameFinished() /* just for testing --> */ && t2 - t1 < std::chrono::seconds(60));
       // when the game has finished
+      finish_point_ = std::chrono::system_clock::now();
+      SendStatisticsToDatabase();
       // TODO add logic
       game_started_ = false;
     });
@@ -132,12 +150,137 @@ bool GameLogic::Running() {
  * database.
  *
  * @brief Send statistics of the game to MYSQL database.
+ * @todo Move to Game class.
  */
 void GameLogic::SendStatisticsToDatabase() {
-//  sql::Connection *con;
-//
-//  // create game table quote
-//  auto prepared_stmt = con->prepareStatement("");
+  // serialize time points into datetime strings for query
+  auto game_start_point = std::chrono::system_clock::to_time_t(start_point_);
+  auto game_finish_point = std::chrono::system_clock::to_time_t(finish_point_);
+  char game_start_str[128];
+  char game_finish_str[128];
+  auto time_info = localtime(&game_start_point);
+  std::strftime(game_start_str, 128, "%F %T", time_info);
+  time_info = localtime(&game_finish_point);
+  std::strftime(game_finish_str, 128, "%F %T", time_info);
+
+  try {
+    sql::Driver *driver;
+    sql::Connection *conn;
+
+    // connect to database
+    driver = get_driver_instance();
+    conn = driver->connect("localhost", "upzp", "Haslo_UPZP_70");
+    conn->setSchema("upzp");
+
+    // create game table quote
+    sql::PreparedStatement* prepared_stmt = conn->prepareStatement(
+        "INSERT INTO stat_map_game(game_id, map, start_time, end_time, team_red_points, team_blue_points, team_won)"
+        "VALUES (?, ?, ?, ?, ?, ?, ?)");
+    prepared_stmt->setInt(1,game_id_);
+    prepared_stmt->setString(2,map_name_);
+    prepared_stmt->setDateTime(3, game_start_str);
+    prepared_stmt->setDateTime(4, game_finish_str);
+    prepared_stmt->setInt(5, game_->red_team_.Score());
+    prepared_stmt->setInt(6, game_->blue_team_.Score());
+    game_->RedTeamWon() ? prepared_stmt->setString(7, "red") :
+    prepared_stmt->setString(7, "blue");
+    prepared_stmt->execute();
+    delete prepared_stmt;
+
+    // create player table quote
+    CreatePlayersTableStatement(&prepared_stmt, conn);
+    prepared_stmt->execute();
+    delete prepared_stmt;
+
+    delete conn;
+  } catch (sql::SQLException &e) {
+    using std::cout;
+    cout << "# ERR: SQLException in " << __FILE__;
+    cout << "(" << __FUNCTION__ << ") on line "
+    << __LINE__ << std::endl;
+    cout << "# ERR: " << e.what();
+    cout << " (MySQL error code: " << e.getErrorCode();
+    cout << ", SQLState: " << e.getSQLState() << " )" << std::endl;
+  }
+}
+
+/**
+ * Create player table prepared statement. It will be put into
+ * MySQL API structure for later execution.
+ *
+ * @brief Create players table statement.
+ * @param prepared_stmt Pointer to prepared statement structure pointer.
+ * @param conn MySQL connection pointer.
+ * @todo Move to Game class.
+ */
+void GameLogic::CreatePlayersTableStatement(
+    sql::PreparedStatement **prepared_stmt, sql::Connection* conn) {
+  std::string query = "INSERT INTO stat_player_game"
+                      "(player_id, game_id, player_points, "
+                      "team, vehicle, distance, team_points, map, won) values ";
+
+  bool first = true;
+  for (auto& player : game_->red_team_.players_) {
+    query += first ?  "(?, ?, ?, ?, ?, ?, ?, ?, ?)" : ", (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+    first = false;
+  }
+  for (auto& player : game_->blue_team_.players_) {
+    query += first ?  "(?, ?, ?, ?, ?, ?, ?, ?, ?)" : ", (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+    first = false;
+  }
+
+  *prepared_stmt = conn->prepareStatement(query);
+
+  // set values
+  unsigned int i = 0;
+  for (auto& player : game_->red_team_.players_) {
+    (*prepared_stmt)->setInt(++i, player.Id());
+    (*prepared_stmt)->setInt(++i, game_id_);
+    (*prepared_stmt)->setInt(++i, player.Points());
+    (*prepared_stmt)->setString(++i, "red");
+    switch (player.Vehicle()) {
+      case VehicleType::PEDESTRIAN:
+        (*prepared_stmt)->setString(++i, "walk");
+        break;
+      case VehicleType::CYCLIST:
+        (*prepared_stmt)->setString(++i, "bike");
+        break;
+      case VehicleType::CAR:
+        (*prepared_stmt)->setString(++i, "car");
+        break;
+      default:
+        (*prepared_stmt)->setString(++i, "walk");
+        break;
+    }
+    (*prepared_stmt)->setInt(++i, player.DistanceTraveled());
+    (*prepared_stmt)->setInt(++i, game_->red_team_.Score());
+    (*prepared_stmt)->setString(++i, map_name_);
+    (*prepared_stmt)->setInt(++i, game_->RedTeamWon());
+  }
+  for (auto& player : game_->blue_team_.players_) {
+    (*prepared_stmt)->setInt(++i, player.Id());
+    (*prepared_stmt)->setInt(++i, game_id_);
+    (*prepared_stmt)->setInt(++i, player.Points());
+    (*prepared_stmt)->setString(++i, "blue");
+    switch (player.Vehicle()) {
+      case VehicleType::PEDESTRIAN:
+        (*prepared_stmt)->setString(++i, "walk");
+        break;
+      case VehicleType::CYCLIST:
+        (*prepared_stmt)->setString(++i, "bike");
+        break;
+      case VehicleType::CAR:
+        (*prepared_stmt)->setString(++i, "car");
+        break;
+      default:
+        (*prepared_stmt)->setString(++i, "walk");
+        break;
+    }
+    (*prepared_stmt)->setInt(++i, player.DistanceTraveled());
+    (*prepared_stmt)->setInt(++i, game_->blue_team_.Score());
+    (*prepared_stmt)->setString(++i, map_name_);
+    (*prepared_stmt)->setInt(++i, game_->BlueTeamWon());
+  }
 }
 
 }  // namespace upsp::game_logic

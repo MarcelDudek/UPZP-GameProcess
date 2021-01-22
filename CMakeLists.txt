@@ -16,7 +16,8 @@ find_package(Threads REQUIRED)
 # INCLUDE FLATBUFFERS AND ASIO
 include_directories(
         /usr/include/asio
-        /snap/flatbuffers/current/include)
+        /snap/flatbuffers/current/include
+        /usr/include/cppconn)
 
 # INCLUDE DIRECTORIES
 include_directories(
@@ -39,7 +40,7 @@ add_executable(client_communication_mocker
         UPZP-GameProcess/datagram/datagram.cpp
         client_communication_mocker/udp_communication_mocker.cpp)
 
-target_link_libraries(UPZP_GameProcess ${MYSQL_LIB})
+target_link_libraries(UPZP_GameProcess ${MYSQL_LIB} -lmysqlcppconn)
 
 target_compile_definitions(UPZP_GameProcess INTERFACE ASIO_STANDALONE)
 target_compile_definitions(client_communication_mocker INTERFACE ASIO_STANDALONE)

@@ -6,6 +6,7 @@
 #include "client_communication/inc/client_communication.h"
 #include "game_logic/inc/game_logic.h"
 #include "datagram/inc/datagram.h"
+#include "maps.h"
 #include <asio.hpp>
 #include <iostream>
 #include <iomanip>
@@ -75,10 +76,13 @@ void LoadClient(upzp::client_com::ClientCommunication& comm, upzp::game_logic::G
  * @param argc 
  * @param argv 
  * @return err_code
+ * @todo Add other arguments loading.
 */
 int main(int argc, char* argv[]) {
   auto game_logic = std::make_shared<upzp::game_logic::GameLogic>();
-  game_logic->NewGame(upzp::Maps::WROCLAW, 0x01);
+  game_logic->NewGame(
+      {upzp::MapsLongitude(upzp::Maps::WROCLAW), upzp::MapsLatitude(upzp::Maps::WROCLAW)},
+      2000.0, "WROCLAW", 0x01, 500);
   std::unique_ptr<upzp::client_com::ClientCommunication> client_comm;
   try {
     client_comm = std::make_unique<upzp::client_com::ClientCommunication>(LoadClientCommPortArg(argc, argv));

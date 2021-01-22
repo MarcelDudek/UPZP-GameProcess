@@ -10,6 +10,7 @@
 #include "client.h"
 #include "player_input.h"
 #include "game_status_generated.h"
+#include "mysql_connection.h"
 
 namespace upzp::game_logic {
 
@@ -22,6 +23,9 @@ class GameLogic {
 
   std::unique_ptr<Game> game_;
   uint32_t game_id_;
+  std::string map_name_;
+  decltype(std::chrono::system_clock::now()) start_point_, finish_point_;
+
   bool game_started_ = false;
   std::thread game_thread_;
   std::mutex mutex_;
@@ -31,10 +35,12 @@ class GameLogic {
   void Tick();
   bool GameFinished();
   void SendStatisticsToDatabase();
+  void CreatePlayersTableStatement(sql::PreparedStatement** prepared_stmt, sql::Connection* conn);
 
  public:
   GameLogic();
-  void NewGame(Maps map, uint32_t game_id);
+  void NewGame(Coordinates start_point, double radius, std::string map_name, uint32_t game_id,
+               uint64_t point_to_win);
   void AddPlayer(Client client, bool to_red_team);
   void StartGame();
   bool Running();
