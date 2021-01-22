@@ -134,10 +134,10 @@ bool GameLogic::Running() {
  * @brief Send statistics of the game to MYSQL database.
  */
 void GameLogic::SendStatisticsToDatabase() {
-  sql::Connection *con;
-
-  // create game table quote
-  auto prepared_stmt = con->prepareStatement("");
+//  sql::Connection *con;
+//
+//  // create game table quote
+//  auto prepared_stmt = con->prepareStatement("");
 }
 
 }  // namespace upsp::game_logic

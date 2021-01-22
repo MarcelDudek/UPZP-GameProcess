@@ -78,7 +78,7 @@ void LoadClient(upzp::client_com::ClientCommunication& comm, upzp::game_logic::G
 */
 int main(int argc, char* argv[]) {
   auto game_logic = std::make_shared<upzp::game_logic::GameLogic>();
-  game_logic->NewGame(upzp::Maps::WROCLAW);
+  game_logic->NewGame(upzp::Maps::WROCLAW, 0x01);
   std::unique_ptr<upzp::client_com::ClientCommunication> client_comm;
   try {
     client_comm = std::make_unique<upzp::client_com::ClientCommunication>(LoadClientCommPortArg(argc, argv));
