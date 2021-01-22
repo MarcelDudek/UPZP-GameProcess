@@ -21,6 +21,7 @@ class GameLogic {
   const std::chrono::seconds point_box_spawn_period_;
 
   std::unique_ptr<Game> game_;
+  uint32_t game_id_;
   bool game_started_ = false;
   std::thread game_thread_;
   std::mutex mutex_;
@@ -29,10 +30,11 @@ class GameLogic {
 
   void Tick();
   bool GameFinished();
+  void SendStatisticsToDatabase();
 
  public:
   GameLogic();
-  void NewGame(Maps map);
+  void NewGame(Maps map, uint32_t game_id);
   void AddPlayer(Client client, bool to_red_team);
   void StartGame();
   bool Running();

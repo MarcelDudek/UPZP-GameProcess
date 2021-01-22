@@ -1,4 +1,5 @@
 #include "inc/game_logic.h"
+#include "mysql_connection.h"
 
 namespace upzp::game_logic {
 
@@ -13,10 +14,12 @@ GameLogic::GameLogic() : tick_duration_(1000 / TICK_RATE),
 /**
  * @brief Start a new game.
  * @param map Map to be played.
+ * @param game_id ID of the game that will be send to database.
  */
-void GameLogic::NewGame(Maps map) {
+void GameLogic::NewGame(Maps map, uint32_t game_id) {
   Coordinates start_point {MapsLongitude(map), MapsLatitude(map)};
   game_ = std::make_unique<Game>(1000, start_point, 2000.0);
+  game_id_ = game_id;
 }
 
 /**
@@ -122,6 +125,19 @@ bool GameLogic::Running() {
   ret_val =  game_started_;
   mutex_.unlock();
   return ret_val;
+}
+
+/**
+ * Send statistics of the game and players to MYSQL
+ * database.
+ *
+ * @brief Send statistics of the game to MYSQL database.
+ */
+void GameLogic::SendStatisticsToDatabase() {
+  sql::Connection *con;
+
+  // create game table quote
+  auto prepared_stmt = con->prepareStatement("");
 }
 
 }  // namespace upsp::game_logic

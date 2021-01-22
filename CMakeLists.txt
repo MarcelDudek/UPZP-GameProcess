@@ -6,6 +6,11 @@ set(CMAKE_CXX_STANDARD 17)
 add_compile_options(-Wall -DASIO_STANDALONE)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread")
 
+# MySQL
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/UPZP-GameProcess")
+find_package(MySQL REQUIRED)
+include_directories(${MYSQL_INCLUDE_DIR})
+
 find_package(Threads REQUIRED)
 
 # INCLUDE FLATBUFFERS AND ASIO
@@ -33,6 +38,8 @@ add_executable(client_communication_mocker
         client_communication_mocker/main.cpp
         UPZP-GameProcess/datagram/datagram.cpp
         client_communication_mocker/udp_communication_mocker.cpp)
+
+target_link_libraries(UPZP_GameProcess ${MYSQL_LIB})
 
 target_compile_definitions(UPZP_GameProcess INTERFACE ASIO_STANDALONE)
 target_compile_definitions(client_communication_mocker INTERFACE ASIO_STANDALONE)
