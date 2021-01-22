@@ -122,4 +122,27 @@ flatbuffers::Offset<Upzp::GameStatus::Player>
   return Upzp::GameStatus::CreatePlayer(builder, name, id_, points_, &position, vehicle);
 }
 
+/**
+ * Add distance to already traveled distance
+ * by the player.
+ *
+ * @brief Add distance traveled.
+ * @param distance Distance to be added (in meters).
+ */
+void Player::AddDistanceTraveled(double distance) {
+  if (distance > 0.0)
+    distance_traveled_ += distance;
+}
+
+/**
+ * Get the distance that player traveled during
+ * the game.
+ *
+ * @brief Get distance traveled.
+ * @return Distance in meters.
+ */
+double Player::DistanceTraveled() const {
+  return distance_traveled_;
+}
+
 }  // namespace upzp::game_logic

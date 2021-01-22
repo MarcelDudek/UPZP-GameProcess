@@ -111,6 +111,7 @@ void Game::CalculatePlayerMovement(Player& player, std::chrono::duration<double>
           (180.0 / M_PI) / std::cos(old_position.latitude * M_PI / 180.0),
       old_position.latitude + (dy / EARTH_RADIUS) * (180.0 / M_PI)
     };
+    player.AddDistanceTraveled(distance);
   }
 
   player.AddPoints(CheckForPointBox(old_position, new_position));

@@ -18,6 +18,7 @@ class Player {
   const uint32_t id_;
   const VehicleType vehicle_;
   int64_t points_ = 0;
+  double distance_traveled_ = 0.0;  // in meters
   Coordinates position_ {0.0, 0.0};
   PlayerInput input_;
 
@@ -29,9 +30,11 @@ class Player {
   Coordinates Position() const;
   VehicleType Vehicle() const;
   PlayerInput Input() const;
+  double DistanceTraveled() const;
   void SetPosition(Coordinates coords);
   void SetInput(PlayerInput& input);
   void AddPoints(int64_t points);
+  void AddDistanceTraveled(double distance);
   void ResetScore();
   flatbuffers::Offset<Upzp::GameStatus::Player>
     GenerateFlatbuffers(flatbuffers::FlatBufferBuilder&) const;
