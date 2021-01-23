@@ -1,5 +1,6 @@
 #include "inc/game.h"
 #include <cmath>
+#include <cppconn/prepared_statement.h>
 
 namespace upzp::game_logic {
 
@@ -248,6 +249,105 @@ void Game::GenerateFlatbuffers(flatbuffers::FlatBufferBuilder& builder,
   auto game = Upzp::GameStatus::CreateGame(
       builder, sequence_number, teams, point_boxes, RedTeamWon() || BlueTeamWon());
   builder.Finish(game);
+}
+
+/**
+ * Create player table prepared statement. It will be put into
+ * MySQL API structure for later execution.
+ *
+ * @brief Create players table statement.
+ * @param prepared_stmt Pointer to prepared statement structure pointer.
+ * @param conn MySQL connection pointer.
+ */
+void Game::CreatePlayersTableStatement(sql::PreparedStatement **prepared_stmt,
+                                       sql::Connection *conn, uint32_t game_id,
+                                       const std::string& map_name) const {
+    std::string query = "INSERT INTO stat_player_game"
+                        "(player_id, game_id, player_points, "
+                        "team, vehicle, distance, team_points, map, won) values ";
+
+    bool first = true;
+    for (auto& player : red_team_.players_) {
+      query += first ?  "(?, ?, ?, ?, ?, ?, ?, ?, ?)" : ", (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+      first = false;
+    }
+    for (auto& player : blue_team_.players_) {
+      query += first ?  "(?, ?, ?, ?, ?, ?, ?, ?, ?)" : ", (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+      first = false;
+    }
+
+    *prepared_stmt = conn->prepareStatement(query);
+
+    // set values
+    unsigned int i = 0;
+    for (auto& player : red_team_.players_) {
+      (*prepared_stmt)->setInt(++i, player.Id());
+      (*prepared_stmt)->setInt(++i, game_id);
+      (*prepared_stmt)->setInt(++i, player.Points());
+      (*prepared_stmt)->setString(++i, "red");
+      switch (player.Vehicle()) {
+        case VehicleType::PEDESTRIAN:
+          (*prepared_stmt)->setString(++i, "walk");
+          break;
+        case VehicleType::CYCLIST:
+          (*prepared_stmt)->setString(++i, "bike");
+          break;
+        case VehicleType::CAR:
+          (*prepared_stmt)->setString(++i, "car");
+          break;
+        default:
+          (*prepared_stmt)->setString(++i, "walk");
+          break;
+      }
+      (*prepared_stmt)->setInt(++i, player.DistanceTraveled());
+      (*prepared_stmt)->setInt(++i, red_team_.Score());
+      (*prepared_stmt)->setString(++i, map_name);
+      (*prepared_stmt)->setInt(++i, RedTeamWon());
+    }
+    for (auto& player : blue_team_.players_) {
+      (*prepared_stmt)->setInt(++i, player.Id());
+      (*prepared_stmt)->setInt(++i, game_id);
+      (*prepared_stmt)->setInt(++i, player.Points());
+      (*prepared_stmt)->setString(++i, "blue");
+      switch (player.Vehicle()) {
+        case VehicleType::PEDESTRIAN:
+          (*prepared_stmt)->setString(++i, "walk");
+          break;
+        case VehicleType::CYCLIST:
+          (*prepared_stmt)->setString(++i, "bike");
+          break;
+        case VehicleType::CAR:
+          (*prepared_stmt)->setString(++i, "car");
+          break;
+        default:
+          (*prepared_stmt)->setString(++i, "walk");
+          break;
+      }
+      (*prepared_stmt)->setInt(++i, player.DistanceTraveled());
+      (*prepared_stmt)->setInt(++i, blue_team_.Score());
+      (*prepared_stmt)->setString(++i, map_name);
+      (*prepared_stmt)->setInt(++i, BlueTeamWon());
+    }
+}
+
+/**
+ * Getter for red team's score.
+ *
+ * @brief Red team's score.
+ * @return Points count.
+ */
+int64_t Game::RedTeamScore() const {
+  return red_team_.Score();
+}
+
+/**
+ * Getter for blue team's score.
+ *
+ * @brief Blue team's score.
+ * @return Points count.
+ */
+int64_t Game::BlueTeamScore() const {
+  return blue_team_.Score();
 }
 
 }  // namespace upzp::game_logic

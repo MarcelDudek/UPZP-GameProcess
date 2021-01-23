@@ -8,6 +8,7 @@
 #include "Team.h"
 #include "point_box.h"
 #include "game_status_generated.h"
+#include "mysql_connection.h"
 
 namespace upzp::game_logic {
 
@@ -17,6 +18,8 @@ class Game {
   static constexpr double EARTH_CIRCUMFERENCE = 40075000.0;  // in meters
   static constexpr int64_t POINT_BOX_VALUE = 100;
   static constexpr double POINT_BOX_COLLECT_DISTANCE = 5.0;  // in meters
+
+  Team red_team_, blue_team_;  /**< Teams of the game. */
 
   const int64_t points_to_win_;
   const Coordinates map_placement_;
@@ -34,8 +37,6 @@ class Game {
   double LongitudeToMeters(double longitude, double latitude) const;
 
  public:
-  Team red_team_, blue_team_;
-
   Game(int64_t points_to_win, Coordinates map_placement, double map_radius);
   void SetPlayerInput(PlayerInput& input);
   void AddPlayer(std::string name, uint32_t id, VehicleType vehicle, bool to_red_team);
@@ -44,6 +45,10 @@ class Game {
   void CalculateMovement(std::chrono::duration<double>);
   bool RedTeamWon() const;
   bool BlueTeamWon() const;
+  int64_t RedTeamScore() const;
+  int64_t BlueTeamScore() const;
+  void CreatePlayersTableStatement(sql::PreparedStatement **prepared_stmt, sql::Connection* conn,
+                                   uint32_t game_id, const std::string& map_name) const;
 };
 
 }  // namespace upzp::game_logic

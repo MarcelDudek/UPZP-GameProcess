@@ -36,7 +36,6 @@ class GameLogic {
   void Tick();
   bool GameFinished();
   void SendStatisticsToDatabase();
-  void CreatePlayersTableStatement(sql::PreparedStatement** prepared_stmt, sql::Connection* conn);
 
  public:
   GameLogic();

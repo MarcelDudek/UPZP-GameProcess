@@ -340,3 +340,5 @@ ASALocalRun/
 healthchecksdb
 /UPZP-GameProcess/flatc.exe
 /cmake-build-debug/*
+
+/crt

@@ -153,7 +153,6 @@ bool GameLogic::Running() {
  * database.
  *
  * @brief Send statistics of the game to MYSQL database.
- * @todo Move to Game class.
  */
 void GameLogic::SendStatisticsToDatabase() {
   // serialize time points into datetime strings for query
@@ -184,15 +183,15 @@ void GameLogic::SendStatisticsToDatabase() {
     prepared_stmt->setString(2,map_name_);
     prepared_stmt->setDateTime(3, game_start_str);
     prepared_stmt->setDateTime(4, game_finish_str);
-    prepared_stmt->setInt(5, game_->red_team_.Score());
-    prepared_stmt->setInt(6, game_->blue_team_.Score());
+    prepared_stmt->setInt(5, game_->RedTeamScore());
+    prepared_stmt->setInt(6, game_->BlueTeamScore());
     game_->RedTeamWon() ? prepared_stmt->setString(7, "red") :
     prepared_stmt->setString(7, "blue");
     prepared_stmt->execute();
     delete prepared_stmt;
 
     // create player table quote
-    CreatePlayersTableStatement(&prepared_stmt, conn);
+    game_->CreatePlayersTableStatement(&prepared_stmt, conn, game_id_, map_name_);
     prepared_stmt->execute();
     delete prepared_stmt;
 
@@ -205,85 +204,6 @@ void GameLogic::SendStatisticsToDatabase() {
     cout << "# ERR: " << e.what();
     cout << " (MySQL error code: " << e.getErrorCode();
     cout << ", SQLState: " << e.getSQLState() << " )" << std::endl;
-  }
-}
-
-/**
- * Create player table prepared statement. It will be put into
- * MySQL API structure for later execution.
- *
- * @brief Create players table statement.
- * @param prepared_stmt Pointer to prepared statement structure pointer.
- * @param conn MySQL connection pointer.
- * @todo Move to Game class.
- */
-void GameLogic::CreatePlayersTableStatement(
-    sql::PreparedStatement **prepared_stmt, sql::Connection* conn) {
-  std::string query = "INSERT INTO stat_player_game"
-                      "(player_id, game_id, player_points, "
-                      "team, vehicle, distance, team_points, map, won) values ";
-
-  bool first = true;
-  for (auto& player : game_->red_team_.players_) {
-    query += first ?  "(?, ?, ?, ?, ?, ?, ?, ?, ?)" : ", (?, ?, ?, ?, ?, ?, ?, ?, ?)";
-    first = false;
-  }
-  for (auto& player : game_->blue_team_.players_) {
-    query += first ?  "(?, ?, ?, ?, ?, ?, ?, ?, ?)" : ", (?, ?, ?, ?, ?, ?, ?, ?, ?)";
-    first = false;
-  }
-
-  *prepared_stmt = conn->prepareStatement(query);
-
-  // set values
-  unsigned int i = 0;
-  for (auto& player : game_->red_team_.players_) {
-    (*prepared_stmt)->setInt(++i, player.Id());
-    (*prepared_stmt)->setInt(++i, game_id_);
-    (*prepared_stmt)->setInt(++i, player.Points());
-    (*prepared_stmt)->setString(++i, "red");
-    switch (player.Vehicle()) {
-      case VehicleType::PEDESTRIAN:
-        (*prepared_stmt)->setString(++i, "walk");
-        break;
-      case VehicleType::CYCLIST:
-        (*prepared_stmt)->setString(++i, "bike");
-        break;
-      case VehicleType::CAR:
-        (*prepared_stmt)->setString(++i, "car");
-        break;
-      default:
-        (*prepared_stmt)->setString(++i, "walk");
-        break;
-    }
-    (*prepared_stmt)->setInt(++i, player.DistanceTraveled());
-    (*prepared_stmt)->setInt(++i, game_->red_team_.Score());
-    (*prepared_stmt)->setString(++i, map_name_);
-    (*prepared_stmt)->setInt(++i, game_->RedTeamWon());
-  }
-  for (auto& player : game_->blue_team_.players_) {
-    (*prepared_stmt)->setInt(++i, player.Id());
-    (*prepared_stmt)->setInt(++i, game_id_);
-    (*prepared_stmt)->setInt(++i, player.Points());
-    (*prepared_stmt)->setString(++i, "blue");
-    switch (player.Vehicle()) {
-      case VehicleType::PEDESTRIAN:
-        (*prepared_stmt)->setString(++i, "walk");
-        break;
-      case VehicleType::CYCLIST:
-        (*prepared_stmt)->setString(++i, "bike");
-        break;
-      case VehicleType::CAR:
-        (*prepared_stmt)->setString(++i, "car");
-        break;
-      default:
-        (*prepared_stmt)->setString(++i, "walk");
-        break;
-    }
-    (*prepared_stmt)->setInt(++i, player.DistanceTraveled());
-    (*prepared_stmt)->setInt(++i, game_->blue_team_.Score());
-    (*prepared_stmt)->setString(++i, map_name_);
-    (*prepared_stmt)->setInt(++i, game_->BlueTeamWon());
   }
 }
 
