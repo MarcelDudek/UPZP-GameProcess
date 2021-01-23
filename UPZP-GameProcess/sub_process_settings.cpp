@@ -7,7 +7,8 @@ namespace upzp {
 /**
  * @brief Default constructor.
  */
-SubProcessSettings::SubProcessSettings() = default;
+SubProcessSettings::SubProcessSettings() : map_name("WROCLAW") {
+}
 
 /**
  * Construct the settings structure with
@@ -18,7 +19,7 @@ SubProcessSettings::SubProcessSettings() = default;
  * @param argc
  * @param argv
  */
-SubProcessSettings::SubProcessSettings(int argc, char **argv) {
+SubProcessSettings::SubProcessSettings(int argc, char **argv) : SubProcessSettings() {
   Load(argc, argv);
 }
 
