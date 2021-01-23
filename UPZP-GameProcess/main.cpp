@@ -6,35 +6,9 @@
 #include "client_communication/inc/client_communication.h"
 #include "game_logic/inc/game_logic.h"
 #include "datagram/inc/datagram.h"
-#include "maps.h"
-#include <asio.hpp>
+#include "sub_process_settings.h"
 #include <iostream>
 #include <iomanip>
-
-/**
- * @brief Load client communication UDP port from arguments.
- * @param argc 
- * @param argv 
- * @return Client communication port.
-*/
-int LoadClientCommPortArg(int argc, char* argv[]) {
-  constexpr int DEFAULT_PORT = 8550;
-  int retval = DEFAULT_PORT;  // default value
-
-  for (int i = 0; i < argc - 1; i++) {
-    if (!strcmp("--udp-port", argv[i])) {
-      try {
-        retval = std::stoi(argv[i + 1]);
-      }
-      catch (std::exception& ex) {
-        std::cerr << "During loading of client communication port: " << ex.what() << std::endl;
-        retval = DEFAULT_PORT;
-      }
-    }
-  }
-
-  return retval;
-}
 
 /**
  * @brief Load client from std input.
@@ -76,19 +50,24 @@ void LoadClient(upzp::client_com::ClientCommunication& comm, upzp::game_logic::G
  * @param argc 
  * @param argv 
  * @return err_code
- * @todo Add other arguments loading.
 */
 int main(int argc, char* argv[]) {
+  upzp::SubProcessSettings settings(argc, argv);
+
+  // create game logic object
   auto game_logic = std::make_shared<upzp::game_logic::GameLogic>();
   game_logic->NewGame(
-      {upzp::MapsLongitude(upzp::Maps::WROCLAW), upzp::MapsLatitude(upzp::Maps::WROCLAW)},
-      2000.0, "WROCLAW", 0x01, 500);
+      {settings.start_point_longitude, settings.start_point_latitude},
+      settings.map_radius, settings.map_name, settings.game_id, settings.points_to_win,
+      settings.point_box_spawn_period);
+
+  // create client communication object
   std::unique_ptr<upzp::client_com::ClientCommunication> client_comm;
   try {
-    client_comm = std::make_unique<upzp::client_com::ClientCommunication>(LoadClientCommPortArg(argc, argv));
+    client_comm = std::make_unique<upzp::client_com::ClientCommunication>(settings.udp_port);
     client_comm->AssignGameLogic(game_logic);
-    game_logic->StartGame();
-    client_comm->Start();
+    game_logic->StartGame();  // start game logic thread
+    client_comm->Start();  // start client communication thread
   } catch (std::exception& ex) {
     std::cout << ex.what() << std::endl;
   }

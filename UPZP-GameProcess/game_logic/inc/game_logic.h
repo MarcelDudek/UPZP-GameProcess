@@ -17,13 +17,14 @@ namespace upzp::game_logic {
 class GameLogic {
  private:
   static constexpr uint32_t TICK_RATE = 20;  /**< Tick rate at which the game will be refreshed */
-  static constexpr uint32_t POINT_BOX_SPAWN_PERIOD = 10;
   const std::chrono::milliseconds tick_duration_;
-  const std::chrono::seconds point_box_spawn_period_;
 
   std::unique_ptr<Game> game_;
   uint32_t game_id_;
   std::string map_name_;
+  std::chrono::seconds point_box_spawn_period_;
+
+  // start and end point of the game (for statistics)
   decltype(std::chrono::system_clock::now()) start_point_, finish_point_;
 
   bool game_started_ = false;
@@ -40,7 +41,7 @@ class GameLogic {
  public:
   GameLogic();
   void NewGame(Coordinates start_point, double radius, std::string map_name, uint32_t game_id,
-               uint64_t point_to_win);
+               uint64_t point_to_win, uint16_t point_box_spawn_period);
   void AddPlayer(Client client, bool to_red_team);
   void StartGame();
   bool Running();

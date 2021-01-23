@@ -16,8 +16,7 @@ namespace upzp::game_logic {
  * @brief Constructor.
  */
 GameLogic::GameLogic() : tick_duration_(1000 / TICK_RATE),
-  last_point_box_spawn_(std::chrono::system_clock::now()),
-  point_box_spawn_period_(POINT_BOX_SPAWN_PERIOD) {
+  last_point_box_spawn_(std::chrono::system_clock::now()) {
 }
 
 /**
@@ -26,9 +25,12 @@ GameLogic::GameLogic() : tick_duration_(1000 / TICK_RATE),
  * @param radius Radius of the map in meters.
  * @param map_name Name of the map.
  * @param game_id ID of the game that will be send to database.
- * @param point_to_win
+ * @param point_to_win How many points does the team need to win the game?
+ * @param point_box_spawn_period Point boxes' spawn period in seconds.
  */
-void GameLogic::NewGame(Coordinates start_point, double radius, std::string map_name, uint32_t game_id, uint64_t point_to_win) {
+void GameLogic::NewGame(Coordinates start_point, double radius, std::string map_name,
+                        uint32_t game_id, uint64_t point_to_win, uint16_t point_box_spawn_period) {
+  point_box_spawn_period_ = std::chrono::seconds(point_box_spawn_period);
   game_ = std::make_unique<Game>(point_to_win, start_point, radius);
   game_id_ = game_id;
   map_name_ = std::move(map_name);
@@ -84,7 +86,8 @@ void GameLogic::Tick() {
     last_point_box_spawn_ = now;
   }
 
-  game_->CalculateMovement(std::chrono::duration_cast<std::chrono::duration<double>>(tick_duration_));
+  game_->CalculateMovement(
+      std::chrono::duration_cast<std::chrono::duration<double>>(tick_duration_));
   serialization_seq_num_++;
   mutex_.unlock();
 }
@@ -174,7 +177,8 @@ void GameLogic::SendStatisticsToDatabase() {
 
     // create game table quote
     sql::PreparedStatement* prepared_stmt = conn->prepareStatement(
-        "INSERT INTO stat_map_game(game_id, map, start_time, end_time, team_red_points, team_blue_points, team_won)"
+        "INSERT INTO stat_map_game(game_id, map, start_time, end_time,"
+        "team_red_points, team_blue_points, team_won)"
         "VALUES (?, ?, ?, ?, ?, ?, ?)");
     prepared_stmt->setInt(1,game_id_);
     prepared_stmt->setString(2,map_name_);
