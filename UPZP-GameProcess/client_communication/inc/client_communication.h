@@ -1,6 +1,7 @@
 #pragma once
 
 #include "client_udp.h"
+#include "game_logic.h"
 #include <asio.hpp>
 #include <vector>
 #include <thread>
@@ -10,40 +11,46 @@
 namespace upzp::client_com {
 
 /**
+ * Client communication is receiving player's input
+ * and transmitting game status to and from all clients.
+ *
  * @brief Client communication main class.
+ * @todo Add client disconnect and timeout handling.
 */
 class ClientCommunication {
  private:
   static constexpr std::size_t RECEIVE_BUFFER_SIZE = 4096;
   static constexpr int GAME_STATUS_VER = 100;
   static constexpr int PLAYER_INPUT_VER = 101;
-  const std::chrono::milliseconds game_status_period_;
 
   std::thread run_thread_;
-  bool running_;
+  bool running_ = false;
 
-  uint64_t sequence_number_;
+  std::shared_ptr<game_logic::GameLogic> game_logic_;
 
-  asio::io_context context_;
-  asio::ip::udp::socket socket_;
-  asio::ip::udp::endpoint remote_endpoint_;
-  asio::high_resolution_timer transmit_timer_;
-  std::vector<ClientUdp> clients_;
   std::vector<char> receive_buffer_;
   std::vector<char> transmit_buffer_;
+  asio::io_context context_;
+  asio::high_resolution_timer transmit_timer_;
+  asio::ip::udp::socket socket_;
+  asio::ip::udp::endpoint remote_endpoint_;
+  std::vector<ClientUdp> clients_;
+
+  const std::chrono::milliseconds game_status_period_;
 
   // mutexes
   std::mutex clients_mutex_;
 
-  void GenerateGameStatus(uint64_t seq_num);
+  void GetGameStatusIntoTransmitBuffer();
 
   void StartReceive();
   void StartTransmit();
 
  public:
-  ClientCommunication(const unsigned int port);
+  explicit ClientCommunication(unsigned int port);
   void AddClient(Client client);
   void AddClient(std::vector<Client>& client);
+  void AssignGameLogic(std::shared_ptr<game_logic::GameLogic>);
   void Start();
 };
 
