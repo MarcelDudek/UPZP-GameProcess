@@ -9,47 +9,14 @@
 #include "sub_process_settings.h"
 #include <iostream>
 #include <iomanip>
-
-/**
- * @brief Load client from std input.
- * @param comm Reference to client communication, where loaded client will be added.
-*/
-void LoadClient(upzp::client_com::ClientCommunication& comm, upzp::game_logic::GameLogic& game_logic) {
-  // load client's IPv4 address
-  std::string client_address;
-  std::cout << "Add new client (example input 127.0.0.1:9000): ";
-  std::cin >> client_address;
-
-  // get address and port from a string
-  std::string ip = client_address.substr(0, client_address.find_first_of(':'));
-  std::string port_str = client_address.substr(client_address.find_first_of(':') + 1);
-  int port = std::stoi(port_str);
-
-  // load client name
-  std::string name;
-  std::cout << "Client name: ";
-  std::cin >> name;
-
-  // load client id
-  uint32_t id;
-  std::cout << "Client ID: ";
-  std::cin >> id;
-
-  // load to which team
-  bool to_red_team;
-  std::cout << "Add to red team (1/0): ";
-  std::cin >> to_red_team;
-
-  upzp::Client client(name, id++, upzp::VehicleType::CAR, ip, port);
-  comm.AddClient(client);
-  game_logic.AddPlayer(client, to_red_team);
-}
+#include <chrono>
 
 /**
  * @brief Main function.
  * @param argc 
  * @param argv 
  * @return err_code
+ * @todo Add communication with main process!!!
 */
 int main(int argc, char* argv[]) {
   upzp::SubProcessSettings settings(argc, argv);
@@ -74,7 +41,9 @@ int main(int argc, char* argv[]) {
 
   // loop to keep application alive
   while (game_logic->Running()) {
-    LoadClient(*client_comm, *game_logic);
+    using namespace std::chrono_literals;
+    std::this_thread::sleep_for(5s);
   }
-  // TODO add exit logic
+
+  return 0;
 }
