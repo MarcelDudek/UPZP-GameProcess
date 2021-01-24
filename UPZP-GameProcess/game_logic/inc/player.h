@@ -23,14 +23,14 @@ class Player {
   PlayerInput input_;
 
  public:
-  Player(const std::string name, const uint32_t id, const enum VehicleType vehicle);
-  std::string Name() const;
-  uint32_t Id() const;
-  int64_t Points() const;
-  Coordinates Position() const;
-  VehicleType Vehicle() const;
-  PlayerInput Input() const;
-  double DistanceTraveled() const;
+  Player(std::string  name, uint32_t id, enum VehicleType vehicle);
+  [[nodiscard]] std::string Name() const;
+  [[nodiscard]] uint32_t Id() const;
+  [[nodiscard]] int64_t Points() const;
+  [[nodiscard]] Coordinates Position() const;
+  [[nodiscard]] VehicleType Vehicle() const;
+  [[nodiscard]] PlayerInput Input() const;
+  [[nodiscard]] double DistanceTraveled() const;
   void SetPosition(Coordinates coords);
   void SetInput(PlayerInput& input);
   void AddPoints(int64_t points);

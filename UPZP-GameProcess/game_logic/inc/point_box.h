@@ -9,8 +9,8 @@ namespace upzp::game_logic {
  * Point box that is collectable by the players.
  */
 struct PointBox {
-  Coordinates position;
-  int64_t value;
+  Coordinates position {0.0, 0.0};
+  int64_t value = 100;
 };
 
 }  // namespace upzp::game_logic

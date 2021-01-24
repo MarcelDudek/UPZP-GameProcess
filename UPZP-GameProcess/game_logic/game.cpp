@@ -1,5 +1,6 @@
 #include "inc/game.h"
 #include <cmath>
+#include <utility>
 #include <cppconn/prepared_statement.h>
 
 namespace upzp::game_logic {
@@ -43,7 +44,7 @@ void Game::AddPlayer(std::string name, uint32_t id, VehicleType vehicle, bool to
       (180.0 / M_PI) / std::cos(map_placement_.latitude * M_PI / 180.0),
     map_placement_.latitude + (dy / EARTH_RADIUS) * (180.0 / M_PI)
   };
-  Player new_player(name, id, vehicle);
+  Player new_player(std::move(name), id, vehicle);
   new_player.SetPosition(player_coords);
 
   to_red_team ? red_team_.AddPlayer(new_player) : blue_team_.AddPlayer(new_player);
@@ -131,7 +132,7 @@ void Game::CalculatePlayerMovement(Player& player, std::chrono::duration<double>
 int64_t Game::CheckForPointBox(const Coordinates& old_position, const Coordinates& new_position) {
   int64_t score = 0;
 
-  for (int64_t i = 0; i < point_boxes_.size(); i++) {
+  for (int64_t i = 0; static_cast<std::size_t>(i) < point_boxes_.size(); i++) {
     auto distance = PointBoxDistance(point_boxes_[i].position, old_position, new_position);
     if (distance < POINT_BOX_COLLECT_DISTANCE) {  // point box has been collected
       score += point_boxes_[i].value;
@@ -202,7 +203,7 @@ double Game::PointBoxDistance(const Coordinates & point_box_position,
  * @param latitude In degrees.
  * @return Meters.
  */
-double Game::LatitudeToMeters(double latitude) const {
+double Game::LatitudeToMeters(double latitude) {
   return latitude * 111320.0;
 }
 
@@ -215,7 +216,7 @@ double Game::LatitudeToMeters(double latitude) const {
  * @param latitude In degrees.
  * @return Meters.
  */
-double Game::LongitudeToMeters(double longitude, double latitude) const {
+double Game::LongitudeToMeters(double longitude, double latitude) {
   return (EARTH_CIRCUMFERENCE * std::cos(latitude) / 360.0) * longitude;
 }
 
@@ -267,11 +268,11 @@ void Game::CreatePlayersTableStatement(sql::PreparedStatement **prepared_stmt,
                         "team, vehicle, distance, team_points, map, won) values ";
 
     bool first = true;
-    for (auto& player : red_team_.players_) {
+    for ([[maybe_unused]] auto& player : red_team_.players_) {
       query += first ?  "(?, ?, ?, ?, ?, ?, ?, ?, ?)" : ", (?, ?, ?, ?, ?, ?, ?, ?, ?)";
       first = false;
     }
-    for (auto& player : blue_team_.players_) {
+    for ([[maybe_unused]] auto& player : blue_team_.players_) {
       query += first ?  "(?, ?, ?, ?, ?, ?, ?, ?, ?)" : ", (?, ?, ?, ?, ?, ?, ?, ?, ?)";
       first = false;
     }

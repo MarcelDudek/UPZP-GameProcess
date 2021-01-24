@@ -1,7 +1,7 @@
 #ifdef _WIN32
 #define _WIN32_WINNT 0x0A00
-#endif
 #define ASIO_STANDALONE
+#endif
 
 #include "client_communication/inc/client_communication.h"
 #include "game_logic/inc/game_logic.h"
@@ -75,8 +75,6 @@ int main(int argc, char* argv[]) {
   // loop to keep application alive
   while (game_logic->Running()) {
     LoadClient(*client_comm, *game_logic);
-    //using namespace std::chrono_literals;
-    //std::this_thread::sleep_for(5min);
   }
   // TODO add exit logic
 }

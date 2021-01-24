@@ -32,9 +32,9 @@ class Game {
 
   void CalculatePlayerMovement(Player&, std::chrono::duration<double>&);
   int64_t CheckForPointBox(const Coordinates&, const Coordinates&);
-  double PointBoxDistance(const Coordinates&, const Coordinates&, const Coordinates&) const;
-  double LatitudeToMeters(double latitude) const;
-  double LongitudeToMeters(double longitude, double latitude) const;
+  [[nodiscard]] double PointBoxDistance(const Coordinates&, const Coordinates&, const Coordinates&) const;
+  [[nodiscard]] static double LatitudeToMeters(double latitude) ;
+  [[nodiscard]] static double LongitudeToMeters(double longitude, double latitude) ;
 
  public:
   Game(int64_t points_to_win, Coordinates map_placement, double map_radius);
@@ -43,10 +43,10 @@ class Game {
   void GeneratePointBox();
   void GenerateFlatbuffers(flatbuffers::FlatBufferBuilder&, uint64_t) const;
   void CalculateMovement(std::chrono::duration<double>);
-  bool RedTeamWon() const;
-  bool BlueTeamWon() const;
-  int64_t RedTeamScore() const;
-  int64_t BlueTeamScore() const;
+  [[nodiscard]] bool RedTeamWon() const;
+  [[nodiscard]] bool BlueTeamWon() const;
+  [[nodiscard]] int64_t RedTeamScore() const;
+  [[nodiscard]] int64_t BlueTeamScore() const;
   void CreatePlayersTableStatement(sql::PreparedStatement **prepared_stmt, sql::Connection* conn,
                                    uint32_t game_id, const std::string& map_name) const;
 };

@@ -10,8 +10,9 @@ namespace upzp::client_com {
  * @param port Port on which communication will be open.
  */
 ClientCommunication::ClientCommunication(const unsigned int port)
-    : socket_(context_, asio::ip::udp::endpoint(asio::ip::udp::v4(), port)),
-      receive_buffer_(RECEIVE_BUFFER_SIZE), transmit_timer_(context_), game_status_period_(50) {
+    : receive_buffer_(RECEIVE_BUFFER_SIZE), transmit_timer_(context_),
+    socket_(context_, asio::ip::udp::endpoint(asio::ip::udp::v4(), port)),
+    game_status_period_(50) {
 }
 
 /**

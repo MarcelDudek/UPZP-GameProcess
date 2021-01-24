@@ -1,10 +1,8 @@
 #include "inc/game_logic.h"
 #include <ctime>
-#include "mysql_connection.h"
 #include <cppconn/driver.h>
 #include <cppconn/exception.h>
 #include <cppconn/resultset.h>
-#include <cppconn/statement.h>
 #include <cppconn/prepared_statement.h>
 
 #include <utility>
@@ -16,7 +14,7 @@ namespace upzp::game_logic {
  * @brief Constructor.
  */
 GameLogic::GameLogic() : tick_duration_(1000 / TICK_RATE),
-  last_point_box_spawn_(std::chrono::system_clock::now()) {
+  point_box_spawn_period_(10), last_point_box_spawn_(std::chrono::system_clock::now()) {
 }
 
 /**
@@ -41,7 +39,7 @@ void GameLogic::NewGame(Coordinates start_point, double radius, std::string map_
  * @param client New player.
  * @param to_red_team Should be added to red team (otherwise will be added to blue)?
  */
-void GameLogic::AddPlayer(Client client, bool to_red_team) {
+void GameLogic::AddPlayer(const Client& client, bool to_red_team) {
   if (game_) {
     mutex_.lock();
     game_->AddPlayer(client.Name(), client.Id(), client.Vehicle(), to_red_team);
@@ -68,7 +66,6 @@ void GameLogic::StartGame() {
       // when the game has finished
       finish_point_ = std::chrono::system_clock::now();
       SendStatisticsToDatabase();
-      // TODO add logic
       game_started_ = false;
     });
   }
@@ -93,7 +90,7 @@ void GameLogic::Tick() {
 }
 
 /**
- * Check if the game has finised which means
+ * Check if the game has finished which means
  * that one of the teams has won the game.
  *
  * @brief Check if the game has finished.
@@ -207,4 +204,4 @@ void GameLogic::SendStatisticsToDatabase() {
   }
 }
 
-}  // namespace upsp::game_logic
+}  // namespace upzp::game_logic

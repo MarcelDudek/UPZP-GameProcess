@@ -10,7 +10,7 @@ class Team {
  public:
   std::vector<Player> players_;
 
-  void AddPlayer(Player);
+  void AddPlayer(const Player&);
   void SetPlayerInput(PlayerInput& input);
   int64_t Score() const;
   flatbuffers::Offset<Upzp::GameStatus::Team>

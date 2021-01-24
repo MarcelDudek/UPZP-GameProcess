@@ -10,7 +10,6 @@
 #include "client.h"
 #include "player_input.h"
 #include "game_status_generated.h"
-#include "mysql_connection.h"
 
 namespace upzp::game_logic {
 
@@ -20,7 +19,7 @@ class GameLogic {
   const std::chrono::milliseconds tick_duration_;
 
   std::unique_ptr<Game> game_;
-  uint32_t game_id_;
+  uint32_t game_id_ = 0;
   std::string map_name_;
   std::chrono::seconds point_box_spawn_period_;
 
@@ -41,7 +40,7 @@ class GameLogic {
   GameLogic();
   void NewGame(Coordinates start_point, double radius, std::string map_name, uint32_t game_id,
                uint64_t point_to_win, uint16_t point_box_spawn_period);
-  void AddPlayer(Client client, bool to_red_team);
+  void AddPlayer(const Client& client, bool to_red_team);
   void StartGame();
   bool Running();
   void GetGameStatus(flatbuffers::FlatBufferBuilder&);

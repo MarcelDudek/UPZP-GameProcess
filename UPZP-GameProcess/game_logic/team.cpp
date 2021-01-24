@@ -6,7 +6,7 @@ namespace upzp::game_logic {
  * @brief Add player to the team.
  * @param player Player to be added.
  */
-void Team::AddPlayer(Player player) {
+void Team::AddPlayer(const Player& player) {
   players_.push_back(player);
 }
 

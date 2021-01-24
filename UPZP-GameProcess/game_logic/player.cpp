@@ -1,3 +1,5 @@
+#include <utility>
+
 #include "inc/player.h"
 
 namespace upzp::game_logic {
@@ -7,8 +9,8 @@ namespace upzp::game_logic {
  * @param name Name of the player.
  * @param id ID of the player.
  */
-Player::Player(const std::string name, const uint32_t id, const enum VehicleType vehicle) :
-  name_(name), id_(id), vehicle_(vehicle) {
+Player::Player(std::string name, const uint32_t id, const enum VehicleType vehicle) :
+  name_(std::move(name)), id_(id), vehicle_(vehicle) {
 }
 
 /**
