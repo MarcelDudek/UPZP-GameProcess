@@ -62,7 +62,7 @@ void GameLogic::StartGame() {
         Tick();
         std::this_thread::sleep_for(tick_duration_);
         t2 = std::chrono::system_clock::now();
-      } while (!GameFinished() /* just for testing --> */ && t2 - t1 < std::chrono::seconds(60));
+      } while (!GameFinished() /* just for testing --> */ && t2 - t1 < std::chrono::seconds(20));
       // when the game has finished
       finish_point_ = std::chrono::system_clock::now();
       SendStatisticsToDatabase();
@@ -165,11 +165,19 @@ void GameLogic::SendStatisticsToDatabase() {
   try {
     sql::Driver *driver;
     sql::Connection *conn;
+    sql::ConnectOptionsMap conn_properties;
+    conn_properties["hostName"] = DB_HOST_NAME;
+    conn_properties["userName"] = DB_USER_NAME;
+    conn_properties["password"] = DB_PASSWORD;
+    conn_properties["schema"] = DB_SCHEMA;
+    conn_properties["sslCA"] = DB_SSL_CA;
+    conn_properties["sslCert"] = DB_SSL_CRT;
+    conn_properties["sslKey"] = DB_SSL_KEY;
 
     // connect to database
     driver = get_driver_instance();
-    conn = driver->connect("localhost", "upzp", "Haslo_UPZP_70");
-    conn->setSchema("upzp");
+    conn = driver->connect(conn_properties);
+    conn->setSchema(DB_SCHEMA);
 
     // create game table quote
     sql::PreparedStatement* prepared_stmt = conn->prepareStatement(

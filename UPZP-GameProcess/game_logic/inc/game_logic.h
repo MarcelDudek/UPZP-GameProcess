@@ -16,6 +16,13 @@ namespace upzp::game_logic {
 class GameLogic {
  private:
   static constexpr uint32_t TICK_RATE = 20;  /**< Tick rate at which the game will be refreshed */
+  static constexpr auto DB_HOST_NAME = "35.246.226.222";
+  static constexpr auto DB_USER_NAME = "dev";
+  static constexpr auto DB_PASSWORD = "pz2021project";
+  static constexpr auto DB_SCHEMA = "Website";
+  static constexpr auto DB_SSL_CA = "./crt/server-ca.pem";
+  static constexpr auto DB_SSL_CRT = "./crt/client-cert.pem";
+  static constexpr auto DB_SSL_KEY = "./crt/client-key.pem";
   const std::chrono::milliseconds tick_duration_;
 
   std::unique_ptr<Game> game_;
