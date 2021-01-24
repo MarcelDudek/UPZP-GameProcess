@@ -55,14 +55,10 @@ void GameLogic::StartGame() {
     start_point_ = std::chrono::system_clock::now();
     game_started_ = true;
     game_thread_ = std::thread([this](){
-      auto t1 = std::chrono::system_clock::now();  // delete later! just for testing!
-      decltype(t1) t2;
-
       do {  // game loop
         Tick();
         std::this_thread::sleep_for(tick_duration_);
-        t2 = std::chrono::system_clock::now();
-      } while (!GameFinished() /* just for testing --> */ && t2 - t1 < std::chrono::seconds(20));
+      } while (!GameFinished());
       // when the game has finished
       finish_point_ = std::chrono::system_clock::now();
       SendStatisticsToDatabase();
