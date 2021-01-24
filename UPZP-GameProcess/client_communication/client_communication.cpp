@@ -21,7 +21,7 @@ ClientCommunication::ClientCommunication(const unsigned int port)
 */
 void ClientCommunication::AddClient(Client client) {
   clients_mutex_.lock();
-  clients_.push_back(client);
+  clients_.emplace_back(client);
   clients_mutex_.unlock();
 }
 
@@ -32,7 +32,7 @@ void ClientCommunication::AddClient(Client client) {
 void ClientCommunication::AddClient(std::vector<Client>& clients) {
   clients_mutex_.lock();
   for (auto& client : clients) {
-    clients_.push_back(client);
+    clients_.emplace_back(client);
   }
   clients_mutex_.unlock();
 }
@@ -56,20 +56,22 @@ void ClientCommunication::Start() {
  * @brief Start receiving thread.
 */
 void ClientCommunication::StartReceive() {
-  socket_.async_receive_from(asio::buffer(receive_buffer_.data(), receive_buffer_.size()),
-    remote_endpoint_,
-    [this](const asio::error_code& error, std::size_t bytes_transfered) {
+  socket_.async_receive_from(
+      asio::buffer(receive_buffer_.data(),receive_buffer_.size()),
+      remote_endpoint_,
+    [this](const asio::error_code& error, std::size_t bytes_transferred) {  // handler
       clients_mutex_.lock();
-      for (auto& client : clients_) {  // check all clients for coresponding address
-        if (remote_endpoint_.address().to_string() == client.Ip_v4() && remote_endpoint_.port() == client.Port()) {
+      for (auto& client : clients_) {  // check all clients for corresponding address
+        if (remote_endpoint_.address().to_string() == client.Ip_v4()
+        && remote_endpoint_.port() == client.Port()) {
           try {
-            bool good_read = client.DecodeDatagram(receive_buffer_.data(), bytes_transfered);
+            bool good_read = client.DecodeDatagram(receive_buffer_.data(), bytes_transferred);
             if (good_read && game_logic_)
               game_logic_->SetPlayerMovement(client.Input());
           }
-          catch (std::exception& ex) {}
-          //std::cout << "Received from " << remote_endpoint_.address().to_string() << ":" << remote_endpoint_.port()
-          //  << " " << bytes_transfered << " bytes of data:\n";
+          catch (std::exception& ex) {
+            std::cerr << "Exception during decoding of client datagram: " << ex.what() << std::endl;
+          }
           break;
         }
       }
@@ -80,7 +82,7 @@ void ClientCommunication::StartReceive() {
 }
 
 /**
- * @brief Start transmiting thread.
+ * @brief Start transmitting thread.
 */
 void ClientCommunication::StartTransmit() {
   transmit_timer_.expires_after(game_status_period_);
@@ -90,9 +92,13 @@ void ClientCommunication::StartTransmit() {
     GetGameStatusIntoTransmitBuffer();
     clients_mutex_.lock();
     for (auto& client : clients_) {  // send game status to every client
-      socket_.async_send_to(asio::buffer(transmit_buffer_.data(), transmit_buffer_.size()), client.remote_endpoint_,
-        [this](const asio::error_code& error, std::size_t bytes_transfered) {
-          //std::cout << "Transmitted " << bytes_transfered << " bytes of data.\n";
+      socket_.async_send_to(
+          asio::buffer(transmit_buffer_.data(),transmit_buffer_.size()),
+          client.remote_endpoint_,
+        [](const asio::error_code& error, std::size_t bytes_transferred) {  // handler
+          if (error)
+            std::cerr << "Client communicator error during transmission: " << error.message()
+            << std::endl;
         });
     }
     clients_mutex_.unlock();
@@ -114,7 +120,8 @@ void ClientCommunication::GetGameStatusIntoTransmitBuffer() {
     transmit_buffer_ = std::vector<char>(builder.GetSize());
     Datagram datagram;
     datagram.SetVersion(GAME_STATUS_VER);
-    datagram.SetPayload(reinterpret_cast<const char*>(builder.GetBufferPointer()), builder.GetSize());
+    datagram.SetPayload(reinterpret_cast<const char*>(builder.GetBufferPointer()),
+                        builder.GetSize());
     datagram.SetPayloadChecksum(true);
     transmit_buffer_ = datagram.Get();
   }

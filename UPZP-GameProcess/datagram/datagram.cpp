@@ -33,7 +33,7 @@ void Datagram::Load(const void* buffer, const size_t length) {
   version_ = *(static_cast<const int16_t*>(buffer) + 1) & 0x00FF;
   payload_checksum_included_ =
       *(static_cast<const uint8_t*>(buffer) + 3) & 0b10000000;
-  payload_lenght_ = *(static_cast<const uint32_t*>(buffer) + 1);
+  payload_length_ = *(static_cast<const uint32_t*>(buffer) + 1);
 
   unsigned short header_lenght;
   int16_t header_checksum;
@@ -67,10 +67,10 @@ void Datagram::Load(const void* buffer, const size_t length) {
   }
 
   // load payload
-  if (payload_lenght_ + header_lenght > length) {
+  if (payload_length_ + header_lenght > length) {
     throw std::runtime_error("Payload length overflows the datagram.");
   }
-  payload_ = std::vector<char>(payload_start, payload_start + payload_lenght_);
+  payload_ = std::vector<char>(payload_start, payload_start + payload_length_);
 }
 
 /**
@@ -81,7 +81,7 @@ void Datagram::Load(const void* buffer, const size_t length) {
  * @return True for correct payload.
  */
 bool Datagram::PayloadCorrectness() const {
-  if (payload_lenght_ != payload_.size()) return false;
+  if (payload_length_ != payload_.size()) return false;
 
   if (payload_checksum_included_) {
     int32_t crc =
@@ -128,7 +128,7 @@ void Datagram::SetPayloadChecksum(bool include_payload_checksum) {
 void Datagram::SetPayload(const char* buffer, std::size_t length) {
   if (length <= std::numeric_limits<uint32_t>::max()) {
     payload_ = std::vector<char>(buffer, buffer + length);
-    payload_lenght_ = length;
+    payload_length_ = length;
   }
 }
 
@@ -140,10 +140,10 @@ std::vector<char> Datagram::Get() const {
   std::size_t length = 12 + payload_.size();
   if (payload_checksum_included_) length += 4;
 
-  // begin seq, version and checsum include
+  // begin seq, version and checksum include
   std::vector<char> retval(length);
-  retval[0] = BEGIN_SEQUENCE & 0x00FF;
-  retval[1] = (BEGIN_SEQUENCE & 0xFF00) >> 8;
+  retval[0] = BEGIN_SEQUENCE & 0x00FFu;
+  retval[1] = (BEGIN_SEQUENCE & 0xFF00u) >> 8;
   retval[2] = version_ & 0x00FF;
   retval[3] = (version_ & 0x7F00) >> 8;
   if (payload_checksum_included_) retval[3] |= 0x80;
@@ -162,7 +162,7 @@ std::vector<char> Datagram::Get() const {
     header_checksum = reinterpret_cast<int16_t*>(&retval[14]);
     payload_start = static_cast<void*>(&retval[16]);
     *header_checksum =
-      CRC::Calculate(retval.data(), 14, CRC::CRC_16_ARC());  // caluclate header checksum
+      CRC::Calculate(retval.data(), 14, CRC::CRC_16_ARC());  // calculate header checksum
   } else {
     header_checksum = reinterpret_cast<int16_t*>(&retval[10]);
     payload_start = static_cast<void*>(&retval[12]);

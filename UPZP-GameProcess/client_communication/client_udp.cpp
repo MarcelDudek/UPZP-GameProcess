@@ -10,8 +10,8 @@ namespace upzp::client_com {
  * @param vehicle Client's vehicle type.
  * @param ip Client's IP v4.
 */
-ClientUdp::ClientUdp(const std::string name, const uint32_t id,
-  const VehicleType vehicle, const std::string ip, const unsigned int port)
+ClientUdp::ClientUdp(const std::string& name, const uint32_t id,
+  const VehicleType vehicle, const std::string& ip, const unsigned int port)
   : Client(name, id, vehicle, ip, port), remote_endpoint_(asio::ip::make_address(ip), port) {
   input_.id = this->id_;
   input_.move = false;
