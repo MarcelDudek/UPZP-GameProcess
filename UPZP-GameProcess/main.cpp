@@ -5,12 +5,12 @@
 
 #include "client_communication/inc/client_communication.h"
 #include "mainproc_communication/inc/mainproc_communication.h"
-#include "mainproc_communication/inc/mainproc_tcp.h"
 #include "datagram/inc/datagram.h"
 #include <asio.hpp>
 #include <iostream>
 #include <iomanip>
-
+#include <boost/asio.hpp>
+#include <boost/thread.hpp>
 /**
  * @brief Load client communication UDP port from arguments.
  * @param argc 
@@ -61,14 +61,11 @@ void LoadClient(upzp::client_com::ClientCommunication& comm) {
  * @return err_code
 */
 int main(int argc, char* argv[]) {
-    //std::cout<< "Start\n";
+
   std::unique_ptr<upzp::client_com::ClientCommunication> client_comm;
-  //std::unique_ptr<upzp::mainproc_com::MainProcCommunication> mainproc_comm;
-  //std::unique_ptr<upzp::mainproc_com::MainProcTcp> mainproc_tcp;
-  upzp::mainproc_com::MainProcCommunication mainproc_comm;
-  //upzp::mainproc_com::MainProcTcp mainproc_tcp;
-  mainproc_comm.Start();
-  //mainproc_tcp.Start();
+
+    upzp::mainproc_com::MainProcCommunication *mainproc_comm = new upzp::mainproc_com::MainProcCommunication(54000, "127.0.0.1");
+    mainproc_comm->Start();
   try {
     client_comm = std::make_unique<upzp::client_com::ClientCommunication>(LoadClientCommPortArg(argc, argv));
     client_comm->Start();
@@ -78,7 +75,6 @@ int main(int argc, char* argv[]) {
 
   // loop to keep application alive
   while (true) {
-
     LoadClient(*client_comm.get());
     //using namespace std::chrono_literals;
     //std::this_thread::sleep_for(5min);

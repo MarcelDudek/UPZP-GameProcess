@@ -29,7 +29,7 @@ add_executable(UPZP_GameProcess
         UPZP-GameProcess/client_communication/client_communication.cpp
         UPZP-GameProcess/client_communication/client_udp.cpp
         UPZP-GameProcess/mainproc_communication/mainproc_communication.cpp
-        UPZP-GameProcess/mainproc_communication/mainproc_tcp.cpp)
+        )
 
 add_executable(client_communication_mocker
         client_communication_mocker/main.cpp

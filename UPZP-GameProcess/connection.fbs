@@ -1,0 +1,15 @@
+// UPZP's player input schema
+
+namespace Upzp.Connection;
+
+/// Player's input.
+table FConnection {
+  id:uint32;                // player's ID
+  address:string;	     // player's IP
+  port:uint32;              // player's port
+  connected:bool;           // connection flag
+}
+table FPlayers{
+  players:[FConnection];
+}
+root_type FPlayers;

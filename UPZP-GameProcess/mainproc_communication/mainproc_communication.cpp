@@ -1,80 +1,82 @@
 #include <mainproc_communication.h>
+#include <iostream>
+#include <string>
+#include <sstream>
+#include "flatbuffers/flatbuffers.h"
+#include "../inc/connection_generated.h"
+
+#pragma comment (lib, "ws2_32.lib")
 
 using namespace std;
 namespace upzp::mainproc_com {
-    MainProcCommunication::MainProcCommunication(){
+    MainProcCommunication::MainProcCommunication(unsigned int port, string ipAddress)
+            : socket_(context_, asio::ip::tcp::endpoint(asio::ip::tcp::v4(), port)),
+                receive_buffer_(RECEIVE_BUFFER_SIZE){
         cout << "MainProcCommunication works\n";
+        this->port=port;
+        this->ipAddress=ipAddress;
+        running_ = false;
     }
 
-    int MainProcCommunication::Start() {
-        // Create a socket
-        int listening = socket(AF_INET, SOCK_STREAM, 0);
-        if (listening == -1) {
-            cerr << "Can't create a socket! Quitting" << endl;
-            return -1;
+    void MainProcCommunication::Start() {
+        if (!running_) {
+            running_ = true;
+            StartTransmit();
+            StartReceive();
+            run_thread_ = std::thread([this]() {
+                context_.run();
+                running_ = false;
+            });
         }
-
-        // Bind the ip address and port to a socket
-        sockaddr_in hint;
-        hint.sin_family = AF_INET;
-        hint.sin_port = htons(54000);
-        inet_pton(AF_INET, "0.0.0.0", &hint.sin_addr);
-
-        bind(listening, (sockaddr *) &hint, sizeof(hint));
-
-        // Tell Winsock the socket is for listening
-        listen(listening, SOMAXCONN);
-
-        // Wait for a connection
-        sockaddr_in client;
-        socklen_t clientSize = sizeof(client);
-
-        int clientSocket = accept(listening, (sockaddr *) &client, &clientSize);
-
-        char host[NI_MAXHOST];      // Client's remote name
-        char service[NI_MAXSERV];   // Service (i.e. port) the client is connect on
-
-        memset(host, 0, NI_MAXHOST); // same as memset(host, 0, NI_MAXHOST);
-        memset(service, 0, NI_MAXSERV);
-
-        if (getnameinfo((sockaddr *) &client, sizeof(client), host, NI_MAXHOST, service, NI_MAXSERV, 0) == 0) {
-            cout << host << " connected on port " << service << endl;
-        } else {
-            inet_ntop(AF_INET, &client.sin_addr, host, NI_MAXHOST);
-            cout << host << " connected on port " << ntohs(client.sin_port) << endl;
-        }
-
-        // Close listening socket
-        close(listening);
-
-        // While loop: accept and echo message back to client
-        char buf[4096];
-
-        while (true) {
-            memset(buf, 0, 4096);
-            cout << "Waiting\n";
-            // Wait for client to send data
-            int bytesReceived = recv(clientSocket, buf, 4096, 0);
-            if (bytesReceived == -1) {
-                cerr << "Error in recv(). Quitting" << endl;
-                break;
-            }
-
-            if (bytesReceived == 0) {
-                cout << "Disconnected " << endl;
-                break;
-            }
-
-            cout << string(buf, 0, bytesReceived) << endl;
-
-            // Echo message back to client
-            send(clientSocket, buf, bytesReceived + 1, 0);
-        }
-
-        // Close the socket
-        close(clientSocket);
-
-        return 0;
     }
 
+    void MainProcCommunication::StartReceive() {
+
+        socket_.async_receive(asio::buffer(receive_buffer_.data(), receive_buffer_.size()),
+                              [this](const asio::error_code& error, std::size_t bytes_transfered){
+                                  try {
+
+                                  }
+                                  catch (std::exception& ex) {}try {
+
+                              }
+                              catch (std::exception& ex) {}
+                              StartReceive();
+        });
+    }
+
+    void MainProcCommunication::StartTransmit() {
+        GenerateInfo();
+        socket_.async_send(asio::buffer(transmit_buffer_.data(), transmit_buffer_.size()),
+                              [this](const asio::error_code& error, std::size_t bytes_transfered) {
+                                  StartTransmit();
+        });
+
+    }
+    void MainProcCommunication::GenerateInfo() {
+        flatbuffers::FlatBufferBuilder builder(4096);
+        auto player_1_address = builder.CreateString("127.0.1.1");
+        auto player_2_address = builder.CreateString("127.0.2.1");
+        auto player_3_address = builder.CreateString("127.0.3.1");
+        auto player_4_address = builder.CreateString("127.0.4.1");
+        // create players connection
+
+        auto player_1_connection = Upzp::Connection::CreateFConnection(builder, 0x100, player_1_address, 51000, true);
+        auto player_2_connection = Upzp::Connection::CreateFConnection(builder, 0x200, player_2_address, 51001, true);
+        auto player_3_connection = Upzp::Connection::CreateFConnection(builder, 0x300, player_3_address, 51002, true);
+        auto player_4_connection = Upzp::Connection::CreateFConnection(builder, 0x400, player_4_address, 51003, true);
+
+        std::vector<flatbuffers::Offset<Upzp::Connection::FConnection>> connections_vec;
+        connections_vec.push_back(player_1_connection);
+        connections_vec.push_back(player_2_connection);
+        connections_vec.push_back(player_3_connection);
+        connections_vec.push_back(player_4_connection);
+
+        auto connections = builder.CreateVector(connections_vec);
+        auto players = Upzp::Connection::CreateFPlayers(builder, connections);
+
+        builder.Finish(players);
+        transmit_buffer_ = std::vector<char>(builder.GetSize());
+
+    }
 }
