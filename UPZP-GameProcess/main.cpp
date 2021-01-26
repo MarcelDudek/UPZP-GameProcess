@@ -4,6 +4,7 @@
 #endif
 
 #include "client_communication/inc/client_communication.h"
+#include "main_process_comm/inc/main_process_comm.h"
 #include "game_logic/inc/game_logic.h"
 #include "datagram/inc/datagram.h"
 #include "sub_process_settings.h"
@@ -30,10 +31,13 @@ int main(int argc, char* argv[]) {
 
   // create client communication object
   std::unique_ptr<upzp::client_com::ClientCommunication> client_comm;
+  std::unique_ptr<upzp::main_process_comm::MainProcessComm> main_process_comm;
   try {
+    main_process_comm = std::make_unique<upzp::main_process_comm::MainProcessComm>("127.0.0.1", 3333);
     client_comm = std::make_unique<upzp::client_com::ClientCommunication>(settings.udp_port);
     client_comm->AssignGameLogic(game_logic);
     game_logic->StartGame();  // start game logic thread
+    main_process_comm->Start();
     client_comm->Start();  // start client communication thread
   } catch (std::exception& ex) {
     std::cout << ex.what() << std::endl;
