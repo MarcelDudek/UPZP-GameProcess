@@ -21,7 +21,7 @@ GameLogic::GameLogic() : tick_duration_(1000 / TICK_RATE),
  * @brief Destructor.
  */
 GameLogic::~GameLogic() {
-  game_thread_.join();
+  StopGame();
 }
 
 /**
@@ -61,12 +61,17 @@ void GameLogic::StartGame() {
   if (!game_started_ && game_) {
     start_point_ = std::chrono::system_clock::now();
     game_started_ = true;
+    terminate_ = false;
     game_thread_ = std::thread([this](){
       do {  // game loop
         Tick();
         std::this_thread::sleep_for(tick_duration_);
-      } while (!GameFinished());
+      } while (!GameFinished() && !terminate_);
       // when the game has finished
+      if (terminate_) {
+        game_started_ = false;
+        return;
+      }
       finish_point_ = std::chrono::system_clock::now();
       std::cout << "Game finished.\n";
       SendStatisticsToDatabase();
@@ -216,6 +221,15 @@ void GameLogic::SendStatisticsToDatabase() {
     cout << " (MySQL error code: " << e.getErrorCode();
     cout << ", SQLState: " << e.getSQLState() << " )" << std::endl;
   }
+}
+
+/**
+ * @brief Stop the game thread.
+ */
+void GameLogic::StopGame() {
+  terminate_ = true;
+  if (game_thread_.joinable())
+    game_thread_.join();
 }
 
 }  // namespace upzp::game_logic

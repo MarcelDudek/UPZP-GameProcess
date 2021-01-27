@@ -18,7 +18,7 @@ socket_(context_), ip_v4_(std::move(address)), port_(port), buffer_(1024) {
  * @brief Destructor.
  */
 MainProcessComm::~MainProcessComm() {
-  run_thread_.join();
+  Stop();
 }
 
 /**
@@ -181,6 +181,8 @@ void MainProcessComm::Stop() {
     socket_.close();
     context_.stop();
   }
+  if (run_thread_.joinable())
+    run_thread_.join();
 }
 
 }  // upzp::main_process_comm

@@ -19,7 +19,7 @@ ClientCommunication::ClientCommunication(const unsigned int port)
  * @brief Destructor.
  */
 ClientCommunication::~ClientCommunication() {
-  run_thread_.join();
+  Stop();
 }
 
 /**
@@ -155,6 +155,8 @@ void ClientCommunication::Stop() {
     socket_.close();
     context_.stop();
   }
+  if (run_thread_.joinable())
+    run_thread_.join();
 }
 
 }  // namespace upzp::client_com

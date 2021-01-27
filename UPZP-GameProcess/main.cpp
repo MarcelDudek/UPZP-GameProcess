@@ -57,7 +57,6 @@ int main(int argc, char* argv[]) {
   std::this_thread::sleep_for(2s);
   main_process_comm->Stop();
   client_comm->Stop();
-  std::this_thread::sleep_for(500ms);
 
   return 0;
 }
