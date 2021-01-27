@@ -198,7 +198,7 @@ void MainProcessComm::TransmitGameId() {
   auto f_game_id = mainServer::schemas::FGameId::CreateFGameId(builder, game_id_);
   builder.Finish(f_game_id);
   Datagram datagram;
-  datagram.SetVersion(11);
+  datagram.SetVersion(12);
   datagram.SetPayloadChecksum(false);
   datagram.SetPayload(reinterpret_cast<const char*>(builder.GetBufferPointer()),
                       builder.GetSize());
