@@ -18,7 +18,7 @@ int main () {
     buffer.insert(buffer.end(), {'t', 'e', 's', 't', static_cast<char>(0xAB)});
     asio::error_code error;
     asio::write(socket, asio::buffer(buffer), error);
-    asio::write(socket, asio::buffer(buffer), error);
+    // asio::write(socket, asio::buffer(buffer), error);
   }
 }
 #pragma clang diagnostic pop

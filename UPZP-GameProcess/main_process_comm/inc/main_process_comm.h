@@ -4,12 +4,17 @@
 #include <asio.hpp>
 #include <string>
 #include <thread>
+#include <memory>
 #include <datagram_stream.h>
+#include <client_communication.h>
+#include <game_logic.h>
 
 namespace upzp::main_process_comm {
 
 class MainProcessComm {
  private:
+  static constexpr auto GAME_CLIENTS_VERSION = 10;
+
   asio::io_context context_;
   asio::ip::tcp::socket socket_;
   std::thread run_thread_;
@@ -19,11 +24,17 @@ class MainProcessComm {
   std::vector<char> buffer_;
   DatagramStream datagram_stream_;
 
+  std::shared_ptr<client_com::ClientCommunication> client_comm_;
+  std::shared_ptr<game_logic::GameLogic> game_logic_;
+
   void Read();
+  void LoadClients();
 
  public:
   MainProcessComm(std::string address, uint16_t port);
   void Start();
+  void AssignClientCommunication(std::shared_ptr<client_com::ClientCommunication>);
+  void AssignGameLogic(std::shared_ptr<game_logic::GameLogic>);
 };
 
 }  // namespace upzp::main_process_comm

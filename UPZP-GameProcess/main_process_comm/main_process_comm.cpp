@@ -1,5 +1,7 @@
 #include "inc/main_process_comm.h"
 #include <iostream>
+#include <utility>
+#include "game_generated.h"
 
 namespace upzp::main_process_comm {
 
@@ -8,7 +10,7 @@ namespace upzp::main_process_comm {
  * @param port Port for TCP communication.
  */
 MainProcessComm::MainProcessComm(std::string address, uint16_t port) : context_(),
-socket_(context_), ip_v4_(address), port_(port), buffer_(1024) {
+socket_(context_), ip_v4_(std::move(address)), port_(port), buffer_(1024) {
 }
 
 /**
@@ -47,11 +49,79 @@ void MainProcessComm::Read() {
     if (error_ != asio::error::eof && error_)  // if there is a connection error
       throw asio::system_error(error_);
     if (datagram_stream_.AddData(buffer_.data(), length)) {
-      std::cout << "Received datagram version " << datagram_stream_.Version() << "!!!\n";
+      LoadClients();
       while (datagram_stream_.FlushData())
-        std::cout << "Received datagram version " << datagram_stream_.Version() << "!!!\n";
+        LoadClients();
     }
   }
+}
+
+/**
+ * @brief Load clients from received datagram.
+ */
+void MainProcessComm::LoadClients() {
+  if (datagram_stream_.Version() != GAME_CLIENTS_VERSION)
+    return;
+  auto payload = datagram_stream_.Payload();
+  auto game = mainServer::schemas::FGame::GetFGame(payload.data());
+  auto teams = game->teams();
+  if (teams->size() < 2)
+    return;
+
+  // add clients
+  std::size_t clients_count = 0;
+  for (std::size_t i = 0; i < 2; i++) {
+    auto clients = (*teams)[i]->clients();
+    clients_count += clients->size();
+    for (auto client : *clients) {
+      VehicleType vehicle_type;
+      using mainServer::schemas::FGame::FVehicleType;
+      switch (client->vehicle()->vehicleType()) {
+        case FVehicleType::FVehicleType_Pedestrian:
+          vehicle_type = VehicleType::PEDESTRIAN;
+          break;
+        case FVehicleType::FVehicleType_Cyclist:
+          vehicle_type = VehicleType::CYCLIST;
+          break;
+        case FVehicleType::FVehicleType_Car:
+          vehicle_type = VehicleType::CAR;
+          break;
+        default:
+          vehicle_type = VehicleType::PEDESTRIAN;
+          break;
+      }
+      Client _client(client->name()->str(), client->id(), vehicle_type,
+                     client->ipAddress()->str(), client->port());
+      if (client_comm_)
+        client_comm_->AddClient(_client);
+      if (game_logic_)
+        game_logic_->AddPlayer(_client, i == 0);
+    }
+  }
+  std::cout << "Added " + std::to_string(clients_count) + " clients.\n";
+}
+
+/**
+ * Assign client communication object to which
+ * information about clients will be send.
+ *
+ * @brief Assign client communication object.
+ * @param client_comm Client communication shared pointer.
+ */
+void MainProcessComm::AssignClientCommunication(
+    std::shared_ptr<client_com::ClientCommunication> client_comm) {
+  client_comm_ = std::move(client_comm);
+}
+
+/**
+ * Assign game_logic object to which
+ * information about clients will be send.
+ *
+ * @brief Assign game logic object.
+ * @param game_logic Client communication shared pointer.
+ */
+void MainProcessComm::AssignGameLogic(std::shared_ptr<game_logic::GameLogic> game_logic) {
+  game_logic_ = std::move(game_logic);
 }
 
 }  // upzp::main_process_comm
