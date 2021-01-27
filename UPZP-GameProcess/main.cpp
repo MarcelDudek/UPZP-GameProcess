@@ -39,7 +39,7 @@ int main(int argc, char* argv[]) {
     main_process_comm->AssignClientCommunication(client_comm);
     main_process_comm->AssignGameLogic(game_logic);
     game_logic->StartGame();  // start game logic thread
-    main_process_comm->Start();
+    main_process_comm->Start();  // start main process communication thread
     client_comm->Start();  // start client communication thread
   } catch (std::exception& ex) {
     std::cout << ex.what() << std::endl;

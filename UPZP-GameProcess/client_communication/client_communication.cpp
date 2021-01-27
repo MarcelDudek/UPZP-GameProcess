@@ -54,6 +54,7 @@ void ClientCommunication::Start() {
     StartTransmit();
     run_thread_ = std::thread([this]() {
       context_.run();
+      std::cout << "Client communication terminated.\n";
       running_ = false;
       });
   }

@@ -68,7 +68,9 @@ void GameLogic::StartGame() {
       } while (!GameFinished());
       // when the game has finished
       finish_point_ = std::chrono::system_clock::now();
+      std::cout << "Game finished.\n";
       SendStatisticsToDatabase();
+      std::cout << "Game thread terminated.\n";
       game_started_ = false;
     });
   }
@@ -204,6 +206,7 @@ void GameLogic::SendStatisticsToDatabase() {
     delete prepared_stmt;
 
     delete conn;
+    std::cout << "Game statistics inserted into the database.\n";
   } catch (sql::SQLException &e) {
     using std::cout;
     cout << "# ERR: SQLException in " << __FILE__;
