@@ -26,7 +26,8 @@ include_directories(
         UPZP-GameProcess/datagram/inc
         UPZP-GameProcess/game_logic/inc
         UPZP-GameProcess/main_process_comm/inc
-        client_communication_mocker/inc)
+        client_communication_mocker/inc
+        main_process_communication_mocker/inc)
 
 # MAIN EXECUTABLE FOR SUB-PROCESS
 add_executable(UPZP_GameProcess
@@ -46,7 +47,13 @@ add_executable(client_communication_mocker
         UPZP-GameProcess/datagram/datagram.cpp
         client_communication_mocker/udp_communication_mocker.cpp)
 
+add_executable(main_process_communication_mocker
+        main_process_communication_mocker/main.cpp
+        UPZP-GameProcess/datagram/datagram.cpp
+        main_process_communication_mocker/tcp_communication_mocker.cpp)
+
 target_link_libraries(UPZP_GameProcess ${MYSQL_LIB} -lmysqlcppconn)
 
 target_compile_definitions(UPZP_GameProcess INTERFACE ASIO_STANDALONE)
 target_compile_definitions(client_communication_mocker INTERFACE ASIO_STANDALONE)
+target_compile_definitions(main_process_communication_mocker INTERFACE ASIO_STANDALONE)

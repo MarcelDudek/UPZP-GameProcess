@@ -33,7 +33,7 @@ int main(int argc, char* argv[]) {
   std::unique_ptr<upzp::client_com::ClientCommunication> client_comm;
   std::unique_ptr<upzp::main_process_comm::MainProcessComm> main_process_comm;
   try {
-    main_process_comm = std::make_unique<upzp::main_process_comm::MainProcessComm>("127.0.0.1", 3333);
+    main_process_comm = std::make_unique<upzp::main_process_comm::MainProcessComm>("127.0.0.1", 3000);
     client_comm = std::make_unique<upzp::client_com::ClientCommunication>(settings.udp_port);
     client_comm->AssignGameLogic(game_logic);
     game_logic->StartGame();  // start game logic thread

@@ -54,8 +54,7 @@ bool DatagramStream::HeaderCorrect() {
   if (buffer_[0] != LOWER || buffer_[1] != UPPER)
     return false;
 
-  int16_t header_checksum = static_cast<int16_t>(buffer_[header_length_ - 2]) +
-      (static_cast<int16_t>(buffer_[header_length_ - 1]) << 8);
+  int16_t header_checksum = *reinterpret_cast<int16_t*>(buffer_.data() + header_length_ - 2);
   int16_t header_crc =
       CRC::Calculate(buffer_.data(), header_length_ - 2, CRC::CRC_16_ARC());
 
@@ -82,14 +81,14 @@ bool DatagramStream::FlushData() {
       } else {
         // erase to the begin seq point
         if (pos > 0)
-          buffer_.erase(buffer_.begin(), buffer_.begin() + pos - 1);
+          buffer_.erase(buffer_.begin(), buffer_.begin() + pos);
         state_ = State::HEADER_1;
       }
     }
 
     // header 1 ****
     if (state_ == State::HEADER_1 && buffer_.size() >= 12) {
-      header_length_ = (buffer_[3] >> 7) ? 16 : 14;
+      header_length_ = (buffer_[3] >> 7) ? 16 : 12;
       state_ = State::HEADER_2;
     }
 
