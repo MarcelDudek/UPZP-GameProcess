@@ -34,6 +34,7 @@ class GameLogic {
   decltype(std::chrono::system_clock::now()) start_point_, finish_point_;
 
   bool game_started_ = false;
+  bool terminate_ = false;
   std::thread game_thread_;
   std::mutex mutex_;
   uint64_t serialization_seq_num_ = 0;
@@ -45,10 +46,12 @@ class GameLogic {
 
  public:
   GameLogic();
+  virtual ~GameLogic();
   void NewGame(Coordinates start_point, double radius, std::string map_name, uint32_t game_id,
                uint64_t point_to_win, uint16_t point_box_spawn_period);
   void AddPlayer(const Client& client, bool to_red_team);
   void StartGame();
+  void StopGame();
   bool Running();
   void GetGameStatus(flatbuffers::FlatBufferBuilder&);
   void SetPlayerMovement(PlayerInput);

@@ -1,0 +1,7 @@
+namespace mainServer.schemas.FGameEnded;
+
+table FGameEnded {
+    ended:bool;
+}
+
+root_type FGameEnded;
