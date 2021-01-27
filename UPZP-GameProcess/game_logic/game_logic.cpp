@@ -18,6 +18,13 @@ GameLogic::GameLogic() : tick_duration_(1000 / TICK_RATE),
 }
 
 /**
+ * @brief Destructor.
+ */
+GameLogic::~GameLogic() {
+  game_thread_.join();
+}
+
+/**
  * @brief Start a new game.
  * @param start_point Start point of the map
  * @param radius Radius of the map in meters.

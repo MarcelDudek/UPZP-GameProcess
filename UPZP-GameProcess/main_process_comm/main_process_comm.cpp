@@ -15,6 +15,13 @@ socket_(context_), ip_v4_(std::move(address)), port_(port), buffer_(1024) {
 }
 
 /**
+ * @brief Destructor.
+ */
+MainProcessComm::~MainProcessComm() {
+  run_thread_.join();
+}
+
+/**
  * @brief Start main process communication in thread.
  */
 void MainProcessComm::Start() {
@@ -172,6 +179,7 @@ void MainProcessComm::Stop() {
   if (running_) {
     socket_.cancel();
     socket_.close();
+    context_.stop();
   }
 }
 

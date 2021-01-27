@@ -33,6 +33,7 @@ class MainProcessComm {
 
  public:
   MainProcessComm(std::string address, uint16_t port);
+  virtual ~MainProcessComm();
   void Start();
   void Stop();
   void AssignClientCommunication(std::shared_ptr<client_com::ClientCommunication>);

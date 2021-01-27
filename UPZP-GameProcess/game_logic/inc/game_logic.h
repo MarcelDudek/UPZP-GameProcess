@@ -45,6 +45,7 @@ class GameLogic {
 
  public:
   GameLogic();
+  virtual ~GameLogic();
   void NewGame(Coordinates start_point, double radius, std::string map_name, uint32_t game_id,
                uint64_t point_to_win, uint16_t point_box_spawn_period);
   void AddPlayer(const Client& client, bool to_red_team);

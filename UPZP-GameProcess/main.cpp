@@ -17,7 +17,6 @@
  * @param argc 
  * @param argv 
  * @return err_code
- * @todo Add communication with main process!!!
 */
 int main(int argc, char* argv[]) {
   upzp::SubProcessSettings settings(argc, argv);
@@ -57,6 +56,8 @@ int main(int argc, char* argv[]) {
   using namespace std::chrono_literals;
   std::this_thread::sleep_for(2s);
   main_process_comm->Stop();
+  client_comm->Stop();
+  std::this_thread::sleep_for(500ms);
 
   return 0;
 }

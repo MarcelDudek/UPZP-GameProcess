@@ -16,6 +16,13 @@ ClientCommunication::ClientCommunication(const unsigned int port)
 }
 
 /**
+ * @brief Destructor.
+ */
+ClientCommunication::~ClientCommunication() {
+  run_thread_.join();
+}
+
+/**
  * @brief Add client.
  * @param client Client to add.
 */
@@ -136,6 +143,17 @@ void ClientCommunication::GetGameStatusIntoTransmitBuffer() {
  */
 void ClientCommunication::AssignGameLogic(std::shared_ptr<game_logic::GameLogic> logic) {
   game_logic_ = std::move(logic);
+}
+
+/**
+ * @brief Stop the client communication.
+ */
+void ClientCommunication::Stop() {
+  if (running_) {
+    socket_.cancel();
+    socket_.close();
+    context_.stop();
+  }
 }
 
 }  // namespace upzp::client_com

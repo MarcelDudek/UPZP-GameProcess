@@ -48,10 +48,12 @@ class ClientCommunication {
 
  public:
   explicit ClientCommunication(unsigned int port);
+  virtual ~ClientCommunication();
   void AddClient(Client client);
   void AddClient(std::vector<Client>& client);
   void AssignGameLogic(std::shared_ptr<game_logic::GameLogic>);
   void Start();
+  void Stop();
 };
 
 }  // namespace upzp::client_com
