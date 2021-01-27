@@ -2,6 +2,7 @@
 #include <iostream>
 #include <utility>
 #include "game_generated.h"
+#include "game_ended_generated.h"
 
 namespace upzp::main_process_comm {
 
@@ -119,7 +120,23 @@ void MainProcessComm::AssignGameLogic(std::shared_ptr<game_logic::GameLogic> gam
  * @brief Send information about game finished.
  */
 void MainProcessComm::SendGameFinished() {
-
+  flatbuffers::FlatBufferBuilder builder(256);
+  auto game_finished = mainServer::schemas::FGameEnded::CreateFGameEnded(builder, true);
+  builder.Finish(game_finished);
+  Datagram datagram;
+  datagram.SetVersion(11);
+  datagram.SetPayloadChecksum(false);
+  datagram.SetPayload(reinterpret_cast<const char*>(builder.GetBufferPointer()),
+                      builder.GetSize());
+  auto buffer = datagram.Get();
+  socket_.async_write_some(
+      asio::buffer(buffer),
+      [this](const asio::error_code& error, std::size_t bytes_transferred){
+        if (error)
+          std::cout << asio::system_error(error).what() << std::endl;
+        else
+          std::cout << "Transmitted game finished state to main process.\n";
+      });
 }
 
 /**
@@ -146,6 +163,16 @@ void MainProcessComm::StartReceive() {
 
         StartReceive();
   });
+}
+
+/**
+ * @brief Stop communication.
+ */
+void MainProcessComm::Stop() {
+  if (running_) {
+    socket_.cancel();
+    socket_.close();
+  }
 }
 
 }  // upzp::main_process_comm
