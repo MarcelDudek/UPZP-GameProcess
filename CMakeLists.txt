@@ -38,7 +38,7 @@ add_executable(UPZP_GameProcess
         UPZP-GameProcess/game_logic/team.cpp
         UPZP-GameProcess/game_logic/game.cpp
         UPZP-GameProcess/game_logic/game_logic.cpp
-        UPZP-GameProcess/sub_process_settings.cpp UPZP-GameProcess/main_process_comm/main_process_comm.cpp UPZP-GameProcess/main_process_comm/inc/main_process_comm.h)
+        UPZP-GameProcess/sub_process_settings.cpp UPZP-GameProcess/main_process_comm/main_process_comm.cpp UPZP-GameProcess/main_process_comm/inc/main_process_comm.h UPZP-GameProcess/datagram/datagram_stream.cpp UPZP-GameProcess/datagram/inc/datagram_stream.h)
 
 add_executable(client_communication_mocker
         client_communication_mocker/main.cpp

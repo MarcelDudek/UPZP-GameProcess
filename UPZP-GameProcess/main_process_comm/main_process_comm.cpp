@@ -46,7 +46,11 @@ void MainProcessComm::Read() {
     auto length = socket_.read_some(asio::buffer(buffer_), error_);
     if (error_ != asio::error::eof && error_)  // if there is a connection error
       throw asio::system_error(error_);
-    std::cout.write(buffer_.data(), length);
+    if (datagram_stream_.AddData(buffer_.data(), length)) {
+      std::cout << "Received datagram version " << datagram_stream_.Version() << "!!!\n";
+      while (datagram_stream_.FlushData())
+        std::cout << "Received datagram version " << datagram_stream_.Version() << "!!!\n";
+    }
   }
 }
 

@@ -4,6 +4,7 @@
 #include <asio.hpp>
 #include <string>
 #include <thread>
+#include <datagram_stream.h>
 
 namespace upzp::main_process_comm {
 
@@ -16,6 +17,7 @@ class MainProcessComm {
   std::string ip_v4_;
   uint16_t port_;
   std::vector<char> buffer_;
+  DatagramStream datagram_stream_;
 
   void Read();
 
