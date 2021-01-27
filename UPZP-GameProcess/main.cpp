@@ -35,7 +35,7 @@ int main(int argc, char* argv[]) {
     client_comm = std::make_unique<upzp::client_com::ClientCommunication>(settings.udp_port);
     client_comm->AssignGameLogic(game_logic);
     main_process_comm =
-        std::make_unique<upzp::main_process_comm::MainProcessComm>("127.0.0.1", 3000);
+        std::make_unique<upzp::main_process_comm::MainProcessComm>("127.0.0.1", settings.tcp_port);
     main_process_comm->AssignClientCommunication(client_comm);
     main_process_comm->AssignGameLogic(game_logic);
     game_logic->StartGame();  // start game logic thread
@@ -54,7 +54,7 @@ int main(int argc, char* argv[]) {
 
   main_process_comm->SendGameFinished();
   using namespace std::chrono_literals;
-  std::this_thread::sleep_for(2s);
+  std::this_thread::sleep_for(100ms);
   main_process_comm->Stop();
   client_comm->Stop();
 
