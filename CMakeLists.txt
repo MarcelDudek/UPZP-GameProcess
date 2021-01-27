@@ -25,6 +25,7 @@ include_directories(
         UPZP-GameProcess/client_communication/inc
         UPZP-GameProcess/datagram/inc
         UPZP-GameProcess/game_logic/inc
+        UPZP-GameProcess/main_process_comm/inc
         client_communication_mocker/inc)
 
 # MAIN EXECUTABLE FOR SUB-PROCESS

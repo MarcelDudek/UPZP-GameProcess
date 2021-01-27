@@ -1,0 +1,26 @@
+namespace mainServer.schemas.FGame;
+
+enum FVehicleType:byte {Pedestrian, Cyclist, Car}
+
+table FVehicle {
+    vehicleType:FVehicleType;
+}
+
+table FClient {
+    name:string;
+    id:uint32;
+    ipAddress:string;
+    port:int;
+    vehicle:FVehicle;
+}
+
+table FTeam {
+    clients:[FClient];
+}
+
+table FGame {
+  id:int;
+  teams:[FTeam];
+}
+
+root_type FGame;
