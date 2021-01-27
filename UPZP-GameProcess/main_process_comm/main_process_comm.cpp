@@ -21,7 +21,8 @@ void MainProcessComm::Start() {
     running_ = true;
     run_thread_ = std::thread([this]() {
       try {
-        Read();
+        Connect();
+        context_.run();
       } catch (std::exception& ex) {
         std::cout << "Main process connection error: " << ex.what() << std::endl;
       }
@@ -32,9 +33,9 @@ void MainProcessComm::Start() {
 }
 
 /**
- * @brief Read data from TCP connection.
+ * @brief Connect to TCP connection.
  */
-void MainProcessComm::Read() {
+void MainProcessComm::Connect() {
   asio::error_code error_;
   asio::ip::tcp::endpoint endpoint(asio::ip::make_address(ip_v4_, error_), port_);
   if (error_)
@@ -43,17 +44,7 @@ void MainProcessComm::Read() {
   if (error_)
     throw asio::system_error(error_);
   std::cout << "Connected to main process\n";
-
-  while (error_ != asio::error::eof) {
-    auto length = socket_.read_some(asio::buffer(buffer_), error_);
-    if (error_ != asio::error::eof && error_)  // if there is a connection error
-      throw asio::system_error(error_);
-    if (datagram_stream_.AddData(buffer_.data(), length)) {
-      LoadClients();
-      while (datagram_stream_.FlushData())
-        LoadClients();
-    }
-  }
+  StartReceive();
 }
 
 /**
@@ -122,6 +113,39 @@ void MainProcessComm::AssignClientCommunication(
  */
 void MainProcessComm::AssignGameLogic(std::shared_ptr<game_logic::GameLogic> game_logic) {
   game_logic_ = std::move(game_logic);
+}
+
+/**
+ * @brief Send information about game finished.
+ */
+void MainProcessComm::SendGameFinished() {
+
+}
+
+/**
+ * @brief Start receive.
+ */
+void MainProcessComm::StartReceive() {
+  socket_.async_read_some(
+      asio::buffer(buffer_),
+      [this](const asio::error_code& error, std::size_t bytes_transferred) {
+        if (error != asio::error::eof && error) {  // if there is a connection error
+          std::cout << asio::system_error(error).what() << std::endl;
+          return;
+        }
+
+        if (error == asio::error::eof)  // if connection ended on main process side
+          return;
+
+        // read data
+        if (datagram_stream_.AddData(buffer_.data(), bytes_transferred)) {
+          LoadClients();
+          while (datagram_stream_.FlushData())
+            LoadClients();
+        }
+
+        StartReceive();
+  });
 }
 
 }  // upzp::main_process_comm
