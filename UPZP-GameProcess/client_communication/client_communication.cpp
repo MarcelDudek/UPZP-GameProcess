@@ -71,16 +71,24 @@ void ClientCommunication::StartReceive() {
       clients_mutex_.lock();
       for (auto& client : clients_) {  // check all clients for corresponding address
         if (remote_endpoint_.address().to_string() == client.Ip_v4()
-        && remote_endpoint_.port() == client.Port()) {
+        /*&& remote_endpoint_.port() == client.Port()*/) {
           try {
             bool good_read = client.DecodeDatagram(receive_buffer_.data(), bytes_transferred);
-            if (good_read && game_logic_)
-              game_logic_->SetPlayerMovement(client.Input());
+            if (good_read) {
+              if (game_logic_)
+                game_logic_->SetPlayerMovement(client.Input());
+              if  (client.first_connection_) {
+                std::cout << "Connected with client " + client.Ip_v4() +
+                  std::to_string(client.remote_endpoint_.port()) + "\n";
+                client.first_connection_ = false;
+              }
+              client.remote_endpoint_ = remote_endpoint_;
+            }
           }
           catch (std::exception& ex) {
             std::cerr << "Exception during decoding of client datagram: " << ex.what() << std::endl;
           }
-          break;
+          //break;
         }
       }
       clients_mutex_.unlock();
