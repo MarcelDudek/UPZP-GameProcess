@@ -78,7 +78,7 @@ void ClientCommunication::StartReceive() {
               if (game_logic_)
                 game_logic_->SetPlayerMovement(client.Input());
               if  (client.first_connection_) {
-                std::cout << "Connected with client " + client.Ip_v4() +
+                std::cout << "Connected with client " + client.Ip_v4() + ":" +
                   std::to_string(client.remote_endpoint_.port()) + "\n";
                 client.first_connection_ = false;
               }

@@ -165,9 +165,22 @@ void MainProcessComm::StartReceive() {
 
         // read data
         if (datagram_stream_.AddData(buffer_.data(), bytes_transferred)) {
-          LoadClients();
-          while (datagram_stream_.FlushData())
+          std::cout << "Received datagram version " +
+            std::to_string(datagram_stream_.Version()) + " from main process.\n";
+          if(datagram_stream_.PayloadCorrectness()) {
             LoadClients();
+          } else {
+            std::cout << "Incorrect payload checksum or length.\n";
+          }
+          while (datagram_stream_.FlushData()) {
+            std::cout << "Received datagram version " +
+                std::to_string(datagram_stream_.Version()) + " from main process.\n";
+            if(datagram_stream_.PayloadCorrectness()) {
+              LoadClients();
+            } else {
+              std::cout << "Incorrect payload checksum or length.\n";
+            }
+          }
         }
 
         StartReceive();
