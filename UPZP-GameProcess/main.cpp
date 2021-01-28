@@ -47,10 +47,6 @@ int main(int argc, char* argv[]) {
     return -1;
   }
 
-//  upzp::Client cl("test", 1, upzp::VehicleType::CAR, "127.0.0.1", 4000);
-//  client_comm->AddClient(cl);
-//  game_logic->AddPlayer(cl, true);
-
   // loop to keep application alive
   while (game_logic->Running()) {
     using namespace std::chrono_literals;

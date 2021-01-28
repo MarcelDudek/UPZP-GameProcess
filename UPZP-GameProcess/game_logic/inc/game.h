@@ -47,8 +47,8 @@ class Game {
   [[nodiscard]] bool BlueTeamWon() const;
   [[nodiscard]] int64_t RedTeamScore() const;
   [[nodiscard]] int64_t BlueTeamScore() const;
-  void CreatePlayersTableStatement(sql::PreparedStatement **prepared_stmt, sql::Connection* conn,
-                                   uint32_t game_id, const std::string& map_name) const;
+  void SendPlayersStatisticsToDatabase(sql::Connection* conn,
+                                       uint32_t game_id, const std::string& map_name) const;
 };
 
 }  // namespace upzp::game_logic
