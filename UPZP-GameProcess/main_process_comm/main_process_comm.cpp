@@ -163,6 +163,8 @@ void MainProcessComm::StartReceive() {
         if (error == asio::error::eof)  // if connection ended on main process side
           return;
 
+        std::cout << "Received data form main process.\n";
+
         // read data
         if (datagram_stream_.AddData(buffer_.data(), bytes_transferred)) {
           std::cout << "Received datagram version " +
