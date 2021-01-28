@@ -70,8 +70,7 @@ void ClientCommunication::StartReceive() {
     [this](const asio::error_code& error, std::size_t bytes_transferred) {  // handler
       clients_mutex_.lock();
       for (auto& client : clients_) {  // check all clients for corresponding address
-        if (remote_endpoint_.address().to_string() == client.Ip_v4()
-        /*&& remote_endpoint_.port() == client.Port()*/) {
+        if (remote_endpoint_.address().to_string() == client.Ip_v4()) {
           try {
             bool good_read = client.DecodeDatagram(receive_buffer_.data(), bytes_transferred);
             if (good_read) {
@@ -88,7 +87,6 @@ void ClientCommunication::StartReceive() {
           catch (std::exception& ex) {
             std::cerr << "Exception during decoding of client datagram: " << ex.what() << std::endl;
           }
-          //break;
         }
       }
       clients_mutex_.unlock();
