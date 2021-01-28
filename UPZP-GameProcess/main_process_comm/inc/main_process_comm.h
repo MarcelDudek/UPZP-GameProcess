@@ -19,8 +19,9 @@ class MainProcessComm {
   asio::ip::tcp::socket socket_;
   std::thread run_thread_;
   bool running_ = false;
-  std::string ip_v4_;
-  uint16_t port_;
+  const std::string ip_v4_;
+  const uint16_t port_;
+  const uint32_t game_id_;
   std::vector<char> buffer_;
   DatagramStream datagram_stream_;
 
@@ -30,9 +31,10 @@ class MainProcessComm {
   void Connect();
   void LoadClients();
   void StartReceive();
+  void TransmitGameId();
 
  public:
-  MainProcessComm(std::string address, uint16_t port);
+  MainProcessComm(std::string address, uint16_t port, uint32_t game_id);
   virtual ~MainProcessComm();
   void Start();
   void Stop();

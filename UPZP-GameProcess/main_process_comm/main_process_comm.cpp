@@ -3,6 +3,7 @@
 #include <utility>
 #include "game_generated.h"
 #include "game_ended_generated.h"
+#include "game_id_generated.h"
 
 namespace upzp::main_process_comm {
 
@@ -10,8 +11,8 @@ namespace upzp::main_process_comm {
  * @brief Constructor.
  * @param port Port for TCP communication.
  */
-MainProcessComm::MainProcessComm(std::string address, uint16_t port) : context_(),
-socket_(context_), ip_v4_(std::move(address)), port_(port), buffer_(1024) {
+MainProcessComm::MainProcessComm(std::string address, uint16_t port, uint32_t game_id) : context_(),
+socket_(context_), ip_v4_(std::move(address)), port_(port), game_id_(game_id), buffer_(1024) {
 }
 
 /**
@@ -52,6 +53,7 @@ void MainProcessComm::Connect() {
   if (error_)
     throw asio::system_error(error_);
   std::cout << "Connected to main process\n";
+  TransmitGameId();
   StartReceive();
 }
 
@@ -183,6 +185,32 @@ void MainProcessComm::Stop() {
   }
   if (run_thread_.joinable())
     run_thread_.join();
+}
+
+/**
+ * Transmit game ID to the main process in order
+ * to verify the communication.
+ *
+ * @brief Transmit game ID.
+ */
+void MainProcessComm::TransmitGameId() {
+  flatbuffers::FlatBufferBuilder builder(256);
+  auto f_game_id = mainServer::schemas::FGameId::CreateFGameId(builder, game_id_);
+  builder.Finish(f_game_id);
+  Datagram datagram;
+  datagram.SetVersion(12);
+  datagram.SetPayloadChecksum(false);
+  datagram.SetPayload(reinterpret_cast<const char*>(builder.GetBufferPointer()),
+                      builder.GetSize());
+  auto buffer = datagram.Get();
+  socket_.async_write_some(
+      asio::buffer(buffer),
+      [this](const asio::error_code& error, std::size_t bytes_transferred) {
+        if (error)
+          std::cout << asio::system_error(error).what() << std::endl;
+        else
+          std::cout << "Transmitted game ID to the main process.\n";
+      });
 }
 
 }  // upzp::main_process_comm
