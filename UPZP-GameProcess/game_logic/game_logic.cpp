@@ -191,24 +191,20 @@ void GameLogic::SendStatisticsToDatabase() {
 
     // create game table quote
     sql::PreparedStatement* prepared_stmt = conn->prepareStatement(
-        "INSERT INTO stat_map_game(game_id, map, start_time, end_time,"
-        "team_red_points, team_blue_points, team_won)"
-        "VALUES (?, ?, ?, ?, ?, ?, ?)");
+          "CALL Add_stat_map_game(?, ?, ?, ?, ?, ?)");
     prepared_stmt->setInt(1,game_id_);
     prepared_stmt->setString(2,map_name_);
     prepared_stmt->setDateTime(3, game_start_str);
     prepared_stmt->setDateTime(4, game_finish_str);
     prepared_stmt->setInt(5, game_->RedTeamScore());
     prepared_stmt->setInt(6, game_->BlueTeamScore());
-    game_->RedTeamWon() ? prepared_stmt->setString(7, "red") :
-    prepared_stmt->setString(7, "blue");
+//    game_->RedTeamWon() ? prepared_stmt->setString(7, "red") :
+//    prepared_stmt->setString(7, "blue");
     prepared_stmt->execute();
     delete prepared_stmt;
 
     // create player table quote
-    game_->CreatePlayersTableStatement(&prepared_stmt, conn, game_id_, map_name_);
-    prepared_stmt->execute();
-    delete prepared_stmt;
+    game_->SendPlayersStatisticsToDatabase(conn, game_id_, map_name_);
 
     delete conn;
     std::cout << "Game statistics inserted into the database.\n";

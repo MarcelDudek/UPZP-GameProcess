@@ -22,7 +22,8 @@ class ClientUdp : public Client {
             unsigned int port);
   explicit ClientUdp(Client& client);
 
-  const asio::ip::udp::endpoint remote_endpoint_;  /**< Client remote endpoint for communication. */
+  asio::ip::udp::endpoint remote_endpoint_;  /**< Client remote endpoint for communication. */
+  bool first_connection_ = true;
   bool DecodeDatagram(const char* buffer, size_t size);
   PlayerInput Input();
 };

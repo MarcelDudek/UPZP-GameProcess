@@ -253,82 +253,65 @@ void Game::GenerateFlatbuffers(flatbuffers::FlatBufferBuilder& builder,
 }
 
 /**
- * Create player table prepared statement. It will be put into
- * MySQL API structure for later execution.
+ * Send players' statistics to remote MySQL database
+ * using prepared statement CALL.
  *
- * @brief Create players table statement.
- * @param prepared_stmt Pointer to prepared statement structure pointer.
+ * @brief Send players' statistics to database.
  * @param conn MySQL connection pointer.
+ * @param game_id Game ID.
+ * @param map_name Map name.
  */
-void Game::CreatePlayersTableStatement(sql::PreparedStatement **prepared_stmt,
-                                       sql::Connection *conn, uint32_t game_id,
-                                       const std::string& map_name) const {
-    std::string query = "INSERT INTO stat_player_game"
-                        "(player_id, game_id, player_points, "
-                        "team, vehicle, distance, team_points, map, won) values ";
-
-    bool first = true;
-    for ([[maybe_unused]] auto& player : red_team_.players_) {
-      query += first ?  "(?, ?, ?, ?, ?, ?, ?, ?, ?)" : ", (?, ?, ?, ?, ?, ?, ?, ?, ?)";
-      first = false;
+void Game::SendPlayersStatisticsToDatabase(sql::Connection *conn, uint32_t game_id,
+                                           const std::string& map_name) const {
+  for (auto& player : red_team_.players_) {
+    auto prepared_stmt = conn->prepareStatement("CALL Add_stat_player_game("
+                                            "?, ?, ?, ?, ?, ?)");
+    prepared_stmt->setInt(1, player.Id());
+    prepared_stmt->setInt(2, game_id);
+    prepared_stmt->setInt(3, player.Points());
+    prepared_stmt->setString(4, "red");
+    switch (player.Vehicle()) {
+      case VehicleType::PEDESTRIAN:
+        prepared_stmt->setString(5, "walk");
+        break;
+      case VehicleType::CYCLIST:
+        prepared_stmt->setString(5, "bike");
+        break;
+      case VehicleType::CAR:
+        prepared_stmt->setString(5, "car");
+        break;
+      default:
+        prepared_stmt->setString(5, "walk");
+        break;
     }
-    for ([[maybe_unused]] auto& player : blue_team_.players_) {
-      query += first ?  "(?, ?, ?, ?, ?, ?, ?, ?, ?)" : ", (?, ?, ?, ?, ?, ?, ?, ?, ?)";
-      first = false;
+    prepared_stmt->setInt(6, player.DistanceTraveled());
+    prepared_stmt->execute();
+    delete prepared_stmt;
+  }
+  for (auto& player : blue_team_.players_) {
+    auto prepared_stmt = conn->prepareStatement("CALL Add_stat_player_game("
+                                                "?, ?, ?, ?, ?, ?)");
+    prepared_stmt->setInt(1, player.Id());
+    prepared_stmt->setInt(2, game_id);
+    prepared_stmt->setInt(3, player.Points());
+    prepared_stmt->setString(4, "red");
+    switch (player.Vehicle()) {
+      case VehicleType::PEDESTRIAN:
+        prepared_stmt->setString(5, "walk");
+        break;
+      case VehicleType::CYCLIST:
+        prepared_stmt->setString(5, "bike");
+        break;
+      case VehicleType::CAR:
+        prepared_stmt->setString(5, "car");
+        break;
+      default:
+        prepared_stmt->setString(5, "walk");
+        break;
     }
-
-    *prepared_stmt = conn->prepareStatement(query);
-
-    // set values
-    unsigned int i = 0;
-    for (auto& player : red_team_.players_) {
-      (*prepared_stmt)->setInt(++i, player.Id());
-      (*prepared_stmt)->setInt(++i, game_id);
-      (*prepared_stmt)->setInt(++i, player.Points());
-      (*prepared_stmt)->setString(++i, "red");
-      switch (player.Vehicle()) {
-        case VehicleType::PEDESTRIAN:
-          (*prepared_stmt)->setString(++i, "walk");
-          break;
-        case VehicleType::CYCLIST:
-          (*prepared_stmt)->setString(++i, "bike");
-          break;
-        case VehicleType::CAR:
-          (*prepared_stmt)->setString(++i, "car");
-          break;
-        default:
-          (*prepared_stmt)->setString(++i, "walk");
-          break;
-      }
-      (*prepared_stmt)->setInt(++i, player.DistanceTraveled());
-      (*prepared_stmt)->setInt(++i, red_team_.Score());
-      (*prepared_stmt)->setString(++i, map_name);
-      (*prepared_stmt)->setInt(++i, RedTeamWon());
-    }
-    for (auto& player : blue_team_.players_) {
-      (*prepared_stmt)->setInt(++i, player.Id());
-      (*prepared_stmt)->setInt(++i, game_id);
-      (*prepared_stmt)->setInt(++i, player.Points());
-      (*prepared_stmt)->setString(++i, "blue");
-      switch (player.Vehicle()) {
-        case VehicleType::PEDESTRIAN:
-          (*prepared_stmt)->setString(++i, "walk");
-          break;
-        case VehicleType::CYCLIST:
-          (*prepared_stmt)->setString(++i, "bike");
-          break;
-        case VehicleType::CAR:
-          (*prepared_stmt)->setString(++i, "car");
-          break;
-        default:
-          (*prepared_stmt)->setString(++i, "walk");
-          break;
-      }
-      (*prepared_stmt)->setInt(++i, player.DistanceTraveled());
-      (*prepared_stmt)->setInt(++i, blue_team_.Score());
-      (*prepared_stmt)->setString(++i, map_name);
-      (*prepared_stmt)->setInt(++i, BlueTeamWon());
-    }
+    prepared_stmt->setInt(6, player.DistanceTraveled());
+    delete prepared_stmt;
+  }
 }
 
 /**

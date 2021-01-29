@@ -1,3 +1,4 @@
+#include <iostream>
 #include "datagram_stream.h"
 #include "CRC.h"
 
@@ -95,12 +96,10 @@ bool DatagramStream::FlushData() {
     // header 2 ****
     if (state_ == State::HEADER_2 && buffer_.size() >= header_length_) {
       if (HeaderCorrect()) {
-        payload_length_ = static_cast<std::size_t>(buffer_[4]) +
-            (static_cast<std::size_t>(buffer_[5]) << 8) +
-            (static_cast<std::size_t>(buffer_[6]) << 16) +
-            (static_cast<std::size_t>(buffer_[7]) << 24);
+        payload_length_ = *reinterpret_cast<uint32_t*>(buffer_.data() + 4);
         state_ = State::PAYLOAD;
       } else {
+        std::cout << "Incorrect header!\n";
         buffer_.erase(buffer_.begin());
         state_ = State::BEGIN_SEQ;
         repeat = true;
