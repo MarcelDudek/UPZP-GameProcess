@@ -41,7 +41,7 @@ bool ClientUdp::DecodeDatagram(const char* buffer, const size_t size) {
   if (datagram.Version() == DATAGRAM_PLAYER_INPUT_VER) {
     auto payload = datagram.Payload();
     auto input = Upzp::PlayerInput::GetInput(payload.data());
-    if (input->sequence() > last_sequence_ /*&& input->id() == id_*/) {  // if sequence is bigger (newer input)
+    if (input->sequence() > last_sequence_ && input->id() == id_) {  // if sequence is bigger (newer input)
       input_.move = input->move();
       input_.direction = input->direction();
       last_sequence_ = input->sequence();
