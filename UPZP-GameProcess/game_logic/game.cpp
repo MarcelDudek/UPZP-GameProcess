@@ -265,7 +265,7 @@ void Game::SendPlayersStatisticsToDatabase(sql::Connection *conn, uint32_t game_
                                            const std::string& map_name) const {
   for (auto& player : red_team_.players_) {
     auto prepared_stmt = conn->prepareStatement("CALL Add_stat_player_game("
-                                            "?, ?, ?, ?, ?, ?, ?, ?, ?)");
+                                            "?, ?, ?, ?, ?, ?)");
     prepared_stmt->setInt(1, player.Id());
     prepared_stmt->setInt(2, game_id);
     prepared_stmt->setInt(3, player.Points());
@@ -285,15 +285,12 @@ void Game::SendPlayersStatisticsToDatabase(sql::Connection *conn, uint32_t game_
         break;
     }
     prepared_stmt->setInt(6, player.DistanceTraveled());
-    prepared_stmt->setInt(7, red_team_.Score());
-    prepared_stmt->setString(8, map_name);
-    prepared_stmt->setInt(9, RedTeamWon());
     prepared_stmt->execute();
     delete prepared_stmt;
   }
   for (auto& player : blue_team_.players_) {
     auto prepared_stmt = conn->prepareStatement("CALL Add_stat_player_game("
-                                                "?, ?, ?, ?, ?, ?, ?, ?, ?)");
+                                                "?, ?, ?, ?, ?, ?)");
     prepared_stmt->setInt(1, player.Id());
     prepared_stmt->setInt(2, game_id);
     prepared_stmt->setInt(3, player.Points());
@@ -313,9 +310,6 @@ void Game::SendPlayersStatisticsToDatabase(sql::Connection *conn, uint32_t game_
         break;
     }
     prepared_stmt->setInt(6, player.DistanceTraveled());
-    prepared_stmt->setInt(7, blue_team_.Score());
-    prepared_stmt->setString(8, map_name);
-    prepared_stmt->setInt(9, RedTeamWon());
     delete prepared_stmt;
   }
 }

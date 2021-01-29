@@ -55,7 +55,7 @@ int main(int argc, char* argv[]) {
 
   main_process_comm->SendGameFinished();
   using namespace std::chrono_literals;
-  std::this_thread::sleep_for(100ms);
+  std::this_thread::sleep_for(500ms);
   main_process_comm->Stop();
   client_comm->Stop();
 
